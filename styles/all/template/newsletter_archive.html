@@ -1,0 +1,53 @@
+<!-- INCLUDECSS @salvocortesiano_newsletter/newsletter.css -->
+<!-- INCLUDE overall_header.html -->
+
+<h2 class="newsletter-title">{{ lang('NL_ARCHIVE_TITLE') }}</h2>
+
+<div class="panel">
+	<div class="inner">
+		<p>{{ NL_ARCHIVE_INTRO }}</p>
+
+		{% if notiziari %}
+			<p class="nl-archive-filter">
+				{% for notiziario in notiziari %}
+					{% if not loop.first %} &middot; {% endif %}
+					{% if notiziario.S_SELECTED %}<strong>{{ notiziario.NAME }} ({{ notiziario.COUNT }})</strong>{% else %}<a href="{{ notiziario.U_LIST }}">{{ notiziario.NAME }} ({{ notiziario.COUNT }})</a>{% endif %}
+				{% endfor %}
+			</p>
+		{% endif %}
+
+		{% if S_NL_CAN_SUBSCRIBE %}
+			<p><a class="nl-cta" href="{{ U_NL_SUBSCRIBE }}">{{ lang('NL_ARCHIVE_SUBSCRIBE') }}</a></p>
+		{% endif %}
+
+		{% if S_NL_EMPTY %}
+			<p>{{ lang('NL_ARCHIVE_EMPTY') }}</p>
+		{% else %}
+			<ul class="topiclist nl-archive-list">
+				{% for numero in numeri %}
+					<li class="row{% if loop.index is odd %} bg1{% else %} bg2{% endif %}">
+						<dl class="row-item">
+							<dt>
+								<div class="list-inner">
+									<a href="{{ numero.U_VIEW }}" class="topictitle">{{ numero.SUBJECT }}</a>
+									<div class="responsive-hide nl-archive-meta">
+										{{ numero.DATE }} &middot; {{ numero.AUTHOR }} &middot; {{ numero.FORMAT }}
+									</div>
+								</div>
+							</dt>
+							<dd class="views nl-archive-views">{{ numero.VIEWS }} <dfn>{{ lang('NL_ARCHIVE_VIEWS') }}</dfn></dd>
+						</dl>
+					</li>
+				{% endfor %}
+			</ul>
+		{% endif %}
+	</div>
+</div>
+
+<!-- IF .pagination -->
+	<div class="action-bar bottom">
+		<!-- INCLUDE pagination.html -->
+	</div>
+<!-- ENDIF -->
+
+<!-- INCLUDE overall_footer.html -->

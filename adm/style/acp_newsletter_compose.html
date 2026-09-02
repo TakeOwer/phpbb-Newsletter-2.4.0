@@ -1,0 +1,922 @@
+<!-- INCLUDE overall_header.html -->
+
+<link href="{{ U_NL_ACP_CSS }}" rel="stylesheet" type="text/css" media="screen" />
+
+<a id="maincontent"></a>
+
+<h1>{{ lang('ACP_NEWSLETTER_COMPOSE') }}</h1>
+
+<div class="nl-identity">
+	<p class="nl-shields">
+		{% if NL_VERSION %}
+			<span class="nl-shield"><span class="nl-shield-label">{{ lang('NL_SHIELD_VERSION') }}</span><span class="nl-shield-value nl-shield-blue">{{ NL_VERSION }}</span></span>
+		{% endif %}
+		<span class="nl-shield" title="{% if NL_PHPBB_REQUIRED %}{{ lang('NL_SHIELD_REQUIRES', NL_PHPBB_REQUIRED) }}{% endif %}">
+			<span class="nl-shield-label">phpBB</span><span class="nl-shield-value {% if S_NL_PHPBB_OK %}nl-shield-green{% else %}nl-shield-red{% endif %}">{{ NL_PHPBB_VERSION }}</span>
+		</span>
+		<span class="nl-shield" title="{% if NL_PHP_REQUIRED %}{{ lang('NL_SHIELD_REQUIRES', NL_PHP_REQUIRED) }}{% endif %}">
+			<span class="nl-shield-label">PHP</span><span class="nl-shield-value {% if S_NL_PHP_OK %}nl-shield-green{% else %}nl-shield-red{% endif %}">{{ NL_PHP_VERSION }}</span>
+		</span>
+		<span class="nl-shield"><span class="nl-shield-label">{{ lang('NL_SHIELD_LICENSE') }}</span><span class="nl-shield-value nl-shield-grey">GPL-2.0</span></span>
+	</p>
+</div>
+
+<p>{{ lang('ACP_NEWSLETTER_COMPOSE_EXPLAIN') }}</p>
+
+{% if not S_ENABLED %}
+	<div class="errorbox">
+		<h3>{{ lang('WARNING') }}</h3>
+		<p>{{ lang('NL_DISABLED_WARNING') }}</p>
+	</div>
+{% endif %}
+
+{% if S_HAS_ERRORS %}
+	<div class="errorbox">
+		<h3>{{ lang('WARNING') }}</h3>
+		{% for errore in errori %}
+			<p>{{ errore.MESSAGE }}</p>
+		{% endfor %}
+	</div>
+{% endif %}
+
+{% if avvisi %}
+	<div class="successbox">
+		{% for avviso in avvisi %}
+			<p>{{ avviso.MESSAGE }}</p>
+		{% endfor %}
+	</div>
+{% endif %}
+
+{% if S_PREVIEW %}
+	<fieldset>
+		<legend>{{ lang('NL_PREVIEW') }}</legend>
+		<div class="nl-preview">{{ NL_PREVIEW }}</div>
+	</fieldset>
+{% endif %}
+
+<form id="newsletter_compose" method="post" action="{{ U_ACTION }}" enctype="multipart/form-data">
+
+<input type="hidden" id="nl_restore" value="{% if S_NL_RESTORE %}1{% else %}0{% endif %}" />
+
+<fieldset>
+	<legend>{{ lang('NL_MESSAGE') }}</legend>
+
+	<dl>
+		<dt><label for="nl_subject">{{ lang('NL_SUBJECT') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_SUBJECT_EXPLAIN') }}</span></dt>
+		<dd><input type="text" id="nl_subject" name="nl_subject" value="{{ NL_SUBJECT }}" maxlength="255" class="inputbox" /></dd>
+	</dl>
+
+	<dl>
+		<dt><label for="nl_format">{{ lang('NL_FORMAT') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_FORMAT_EXPLAIN') }}</span></dt>
+		<dd>
+			<label><input type="radio" id="nl_format" name="nl_format" value="0"{% if S_FORMAT_TEXT %} checked="checked"{% endif %} class="radio" /> {{ lang('NL_FORMAT_TEXT') }}</label>
+			<label><input type="radio" name="nl_format" value="2"{% if S_FORMAT_BBCODE %} checked="checked"{% endif %} class="radio" /> {{ lang('NL_FORMAT_BBCODE') }}</label>
+			<label><input type="radio" name="nl_format" value="1"{% if S_FORMAT_HTML %} checked="checked"{% endif %} class="radio" /> {{ lang('NL_FORMAT_HTML') }}</label>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="nl_body">{{ lang('NL_BODY') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_BODY_EXPLAIN') }}</span></dt>
+		<dd>
+			<div id="nl_bbcode_bar" class="nl-bbbar"{% if not S_FORMAT_BBCODE %} style="display: none;"{% endif %}>
+				<button type="button" class="button2" data-nl-tag="b" title="{{ lang('NL_BB_BOLD') }}"><strong>B</strong></button>
+				<button type="button" class="button2" data-nl-tag="i" title="{{ lang('NL_BB_ITALIC') }}"><em>i</em></button>
+				<button type="button" class="button2" data-nl-tag="u" title="{{ lang('NL_BB_UNDERLINE') }}"><span style="text-decoration: underline;">u</span></button>
+				<button type="button" class="button2" data-nl-tag="quote" title="{{ lang('NL_BB_QUOTE') }}">&#8220;&#8221;</button>
+				<button type="button" class="button2" data-nl-tag="code" title="{{ lang('NL_BB_CODE') }}">&lt;/&gt;</button>
+				<button type="button" class="button2" data-nl-tag="list" data-nl-inner="[*]" title="{{ lang('NL_BB_LIST') }}">&#8801;</button>
+				<button type="button" class="button2" data-nl-tag="img" title="{{ lang('NL_BB_IMG') }}">&#9634;</button>
+				<button type="button" class="button2" data-nl-tag="url" data-nl-prompt="{{ lang('NL_BB_URL_PROMPT') }}" title="{{ lang('NL_BB_URL') }}">&#128279;</button>
+				<button type="button" class="button2" data-nl-panel="nl_panel_color" title="{{ lang('NL_BB_COLOR') }}">&#9679;</button>
+				<button type="button" class="button2" data-nl-panel="nl_panel_size" title="{{ lang('NL_BB_SIZE') }}">A</button>
+				{% if faccine %}
+					<button type="button" class="button2" data-nl-panel="nl_panel_smilies" title="{{ lang('NL_BB_SMILIES') }}">&#9786;</button>
+				{% endif %}
+			</div>
+
+			<div id="nl_panel_color" class="nl-panel" style="display: none;">
+				<p class="nl-panel-title">{{ lang('NL_BB_COLOR_TITLE') }}</p>
+				<div id="nl_palette" class="nl-palette"></div>
+				<p class="nl-panel-foot">
+					<label>{{ lang('NL_BB_COLOR_CUSTOM') }}{{ lang('COLON') }}
+						<input type="color" id="nl_color_custom" value="#0f5d9d" />
+					</label>
+					<button type="button" class="button2" id="nl_color_apply">{{ lang('NL_BB_APPLY') }}</button>
+				</p>
+			</div>
+
+			<div id="nl_panel_size" class="nl-panel" style="display: none;">
+				<p class="nl-panel-title">{{ lang('NL_BB_SIZE_TITLE') }}</p>
+				<p>
+					<button type="button" class="button2 nl-size" data-nl-size="50" style="font-size: 10px;">{{ lang('NL_BB_SIZE_TINY') }}</button>
+					<button type="button" class="button2 nl-size" data-nl-size="85" style="font-size: 12px;">{{ lang('NL_BB_SIZE_SMALL') }}</button>
+					<button type="button" class="button2 nl-size" data-nl-size="100" style="font-size: 13px;">{{ lang('NL_BB_SIZE_NORMAL') }}</button>
+					<button type="button" class="button2 nl-size" data-nl-size="150" style="font-size: 16px;">{{ lang('NL_BB_SIZE_LARGE') }}</button>
+					<button type="button" class="button2 nl-size" data-nl-size="200" style="font-size: 19px;">{{ lang('NL_BB_SIZE_HUGE') }}</button>
+				</p>
+			</div>
+
+			{% if faccine %}
+				<div id="nl_panel_smilies" class="nl-panel" style="display: none;">
+					<p class="nl-panel-title">{{ lang('NL_BB_SMILIES_TITLE') }}</p>
+					<div class="nl-smilies">
+						{% for faccina in faccine %}
+							<button type="button" class="nl-smiley" data-nl-code="{{ faccina.CODE }}" title="{{ faccina.EMOTION }} {{ faccina.CODE }}"><img src="{{ faccina.SRC }}" alt="{{ faccina.CODE }}" /></button>
+						{% endfor %}
+					</div>
+				</div>
+			{% endif %}
+			<textarea id="nl_body" name="nl_body" rows="18" cols="76" class="inputbox">{{ NL_BODY }}</textarea>
+			<div id="nl_bbcode_hint" class="nl-hint"{% if not S_FORMAT_BBCODE %} style="display: none;"{% endif %}>{{ lang('NL_BBCODE_HINT') }}</div>
+		</dd>
+	</dl>
+
+</fieldset>
+
+<fieldset id="nl_banner_box" class="nl-html-only"{% if not S_FORMAT_RICH %} style="display: none;"{% endif %}>
+	<legend>{{ lang('NL_BANNER') }}</legend>
+
+	<p>{{ lang('NL_BANNER_EXPLAIN', NL_BANNER_FOLDER) }}</p>
+
+	{% if S_NL_BANNER %}
+		<dl>
+			<dt><label>{{ lang('NL_BANNER_CURRENT') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_BANNER_CURRENT_EXPLAIN', NL_BANNER_FILE, NL_BANNER_WIDTH, NL_BANNER_HEIGHT, NL_BANNER_SIZE) }}</span></dt>
+			<dd>
+				<div class="nl-banner-preview" style="display: inline-block; max-width: 100%; padding: 5px; background: #ffffff; border: 1px solid #cfcfcf; border-radius: 3px;">
+					<a href="{{ NL_BANNER_LINK }}" target="_blank" rel="noopener noreferrer" style="display: block;"><img src="{{ NL_BANNER_URL }}" alt="{{ lang('NL_BANNER') }}" style="display: block; max-width: 520px; max-height: 90px; width: auto; height: auto;" /></a>
+				</div>
+				<p><input class="button2" type="submit" name="submit_banner_delete" value="{{ lang('NL_BANNER_DELETE') }}" /></p>
+			</dd>
+		</dl>
+
+		<dl>
+			<dt><label for="nl_banner">{{ lang('NL_BANNER_USE') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_BANNER_USE_EXPLAIN') }}</span></dt>
+			<dd><label><input type="checkbox" id="nl_banner" name="nl_banner" value="1"{% if S_NL_BANNER_ON %} checked="checked"{% endif %} class="radio" /> {{ lang('NL_BANNER_USE_YES') }}</label></dd>
+		</dl>
+	{% else %}
+		<p class="nl-hint">{{ lang('NL_BANNER_NONE') }}</p>
+	{% endif %}
+
+	<dl>
+		<dt><label for="nl_banner_file">{{ S_NL_BANNER ? lang('NL_BANNER_REPLACE') : lang('NL_BANNER_UPLOAD') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_BANNER_UPLOAD_EXPLAIN', NL_BANNER_MAX, NL_BANNER_MIN_H, NL_BANNER_MAX_H, NL_BANNER_MIN_W, NL_BANNER_MAX_W) }}</span></dt>
+		<dd>
+			<input type="file" id="nl_banner_file" name="nl_banner_file" accept="image/png,image/jpeg,image/gif" />
+			<input class="button2" type="submit" name="submit_banner" value="{{ lang('NL_BANNER_SAVE') }}" />
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label>{{ lang('NL_BANNER_PICK') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_BANNER_PICK_EXPLAIN') }}</span></dt>
+		<dd>
+			<button type="button" class="button2" id="nl_browse_toggle" data-nl-url="{{ U_NL_BROWSE }}">{{ lang('NL_BANNER_PICK_OPEN') }}</button>
+
+			<div id="nl_browse" class="nl-browse" style="display: none;">
+				<div class="nl-browse-bar">
+					<span id="nl_browse_path" class="nl-browse-path">images/</span>
+					<button type="button" class="button2" id="nl_browse_up" disabled="disabled">&#8593; {{ lang('NL_BANNER_PICK_UP') }}</button>
+				</div>
+
+				<div class="nl-browse-body">
+					<div id="nl_browse_list" class="nl-browse-list"></div>
+					<div class="nl-browse-preview">
+						<div id="nl_browse_thumb" class="nl-browse-thumb"><span class="nl-hint">{{ lang('NL_BANNER_PICK_HINT') }}</span></div>
+						<p id="nl_browse_info" class="nl-hint"></p>
+						<input type="hidden" name="nl_banner_pick" id="nl_banner_pick" value="" />
+						<input class="button1" type="submit" name="submit_banner_pick" id="nl_browse_use" value="{{ lang('NL_BANNER_PICK_USE') }}" disabled="disabled" />
+					</div>
+				</div>
+			</div>
+		</dd>
+	</dl>
+</fieldset>
+
+<fieldset>
+	<legend>{{ lang('NL_MESSAGE') }}</legend>
+
+	<dl>
+		<dt><label>{{ lang('NL_PLACEHOLDERS') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_PLACEHOLDERS_EXPLAIN') }}</span></dt>
+		<dd><span class="nl-placeholders">{USERNAME} &middot; {EMAIL} &middot; {USER_ID} &middot; {BOARD_NAME} &middot; {BOARD_URL} &middot; {DATE} &middot; {UNSUBSCRIBE_URL} &middot; {UNSUBSCRIBE_LINK}</span></dd>
+	</dl>
+
+	<dl>
+		<dt><label for="nl_css">{{ lang('NL_CSS') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_CSS_EXPLAIN') }}</span></dt>
+		<dd>
+			<textarea id="nl_css" name="nl_css" rows="6" cols="76" class="inputbox nl-mono">{{ NL_CSS }}</textarea>
+			<details class="nl-default"><summary>{{ lang('NL_SHOW_DEFAULT') }}</summary><pre>{{ NL_PREDEF_CSS }}</pre></details>
+			<p class="nl-hint">
+				{% if S_CSS_FROM_SETTINGS %}{{ lang('NL_CSS_FROM_SETTINGS') }}{% else %}{{ lang('NL_CSS_BUILTIN') }}{% endif %}
+			</p>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="nl_topics">{{ lang('NL_TOPICS') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_TOPICS_EXPLAIN') }}</span></dt>
+		<dd><input type="text" id="nl_topics" name="nl_topics" value="{{ NL_TOPICS }}" maxlength="255" class="inputbox" placeholder="1234, 5678" /></dd>
+	</dl>
+</fieldset>
+
+<fieldset>
+	<legend>{{ lang('NL_RECIPIENTS') }}</legend>
+
+	{% if S_LISTS_ON %}
+		<dl>
+			<dt><label for="nl_list">{{ lang('NL_LIST') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_LIST_EXPLAIN') }}</span></dt>
+			<dd>
+				<select id="nl_list" name="nl_list">
+					{% for notiziario in notiziari %}
+						<option value="{{ notiziario.VALUE }}" data-nl-groups="{{ notiziario.GROUPS }}"{% if notiziario.S_SELECTED %} selected="selected"{% endif %}>{{ notiziario.NAME }}</option>
+					{% endfor %}
+				</select>
+			</dd>
+		</dl>
+	{% endif %}
+
+	<dl>
+		<dt><label for="nl_groups">{{ lang('NL_GROUPS') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_GROUPS_EXPLAIN') }}</span></dt>
+		<dd>
+			<select id="nl_groups" name="nl_groups[]" multiple="multiple" size="10" class="nl-groups">
+				{% for gruppo in gruppi %}
+					<option value="{{ gruppo.GROUP_ID }}"{% if gruppo.S_SELECTED %} selected="selected"{% endif %}>{{ gruppo.GROUP_NAME }} ({{ gruppo.MEMBERS }})</option>
+				{% endfor %}
+			</select>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="nl_subs">{{ lang('NL_INCLUDE_SUBS') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_INCLUDE_SUBS_EXPLAIN') }}</span></dt>
+		<dd>
+			<label><input type="checkbox" id="nl_subs" name="nl_subs" value="1"{% if S_SUBS %} checked="checked"{% endif %} class="radio" /> {{ lang('NL_SUBSCRIBERS_COUNT', NL_SUBSCRIBERS) }}</label>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="nl_public">{{ lang('NL_PUBLIC') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_PUBLIC_EXPLAIN') }}</span></dt>
+		<dd>
+			{% if S_ARCHIVE_ON %}
+				<label><input type="checkbox" id="nl_public" name="nl_public" value="1"{% if S_PUBLIC %} checked="checked"{% endif %} class="radio" /> {{ lang('NL_PUBLIC_YES') }}</label>
+			{% else %}
+				<span class="nl-hint">{{ lang('NL_PUBLIC_ARCHIVE_OFF', '<a href="' ~ U_SETTINGS ~ '">', '</a>') }}</span>
+			{% endif %}
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="nl_lang">{{ lang('NL_LANG') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_LANG_EXPLAIN') }}</span></dt>
+		<dd>
+			<select id="nl_lang" name="nl_lang">
+				{% for lingua in lingue %}
+					<option value="{{ lingua.VALUE }}"{% if lingua.S_SELECTED %} selected="selected"{% endif %}>{{ lingua.NAME }}</option>
+				{% endfor %}
+			</select>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label>{{ lang('NL_OPTOUT_STATE') }}{{ lang('COLON') }}</label></dt>
+		<dd>
+			{% if S_RESPECT_OPTOUT %}
+				<strong class="nl-ok">{{ lang('NL_OPTOUT_RESPECTED') }}</strong>
+			{% else %}
+				<strong class="nl-warn">{{ lang('NL_OPTOUT_IGNORED') }}</strong>
+			{% endif %}
+			<br /><span class="nl-hint"><a href="{{ U_SETTINGS }}">{{ lang('NL_OPTOUT_CHANGE') }}</a></span>
+		</dd>
+	</dl>
+</fieldset>
+
+<fieldset>
+	<legend>{{ lang('NL_HEADERS') }}</legend>
+
+	<dl>
+		<dt><label for="nl_priority">{{ lang('NL_PRIORITY') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_PRIORITY_EXPLAIN') }}</span></dt>
+		<dd>
+			<select id="nl_priority" name="nl_priority">
+				{% for livello in priorita %}
+					<option value="{{ livello.VALUE }}"{% if livello.S_SELECTED %} selected="selected"{% endif %}>{{ livello.NAME }}</option>
+				{% endfor %}
+			</select>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="nl_importance">{{ lang('NL_IMPORTANCE') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_IMPORTANCE_EXPLAIN') }}</span></dt>
+		<dd>
+			<select id="nl_importance" name="nl_importance">
+				{% for voce in importanza %}
+					<option value="{{ voce.VALUE }}"{% if voce.S_SELECTED %} selected="selected"{% endif %}>{{ voce.NAME }}</option>
+				{% endfor %}
+			</select>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="nl_sensitivity">{{ lang('NL_SENSITIVITY') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_SENSITIVITY_EXPLAIN') }}</span></dt>
+		<dd>
+			<select id="nl_sensitivity" name="nl_sensitivity">
+				{% for voce in riservatezza %}
+					<option value="{{ voce.VALUE }}"{% if voce.S_SELECTED %} selected="selected"{% endif %}>{{ voce.NAME }}</option>
+				{% endfor %}
+			</select>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="nl_from_name">{{ lang('NL_FROM_NAME') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_FROM_NAME_EXPLAIN') }}</span></dt>
+		<dd><input type="text" id="nl_from_name" name="nl_from_name" value="{{ NL_FROM_NAME }}" maxlength="255" class="inputbox" /></dd>
+	</dl>
+
+	<dl>
+		<dt><label for="nl_from_email">{{ lang('NL_FROM_EMAIL') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_FROM_EMAIL_EXPLAIN') }}</span></dt>
+		<dd><input type="email" id="nl_from_email" name="nl_from_email" value="{{ NL_FROM_EMAIL }}" maxlength="100" class="inputbox" /></dd>
+	</dl>
+
+	<dl>
+		<dt><label for="nl_reply_to">{{ lang('NL_REPLY_TO') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_REPLY_TO_EXPLAIN') }}</span></dt>
+		<dd><input type="email" id="nl_reply_to" name="nl_reply_to" value="{{ NL_REPLY_TO }}" maxlength="100" class="inputbox" /></dd>
+	</dl>
+</fieldset>
+
+<fieldset>
+	<legend>{{ lang('NL_DELIVERY') }}</legend>
+
+	<dl>
+		<dt><label for="nl_batch_preset">{{ lang('NL_BATCH') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_BATCH_EXPLAIN') }}</span></dt>
+		<dd>
+			<select id="nl_batch_preset" name="nl_batch_preset" data-nl-toggle="nl_batch_custom">
+				{% for voce in lotti %}
+					<option value="{{ voce.VALUE }}"{% if voce.S_SELECTED %} selected="selected"{% endif %}>{{ voce.NAME }}</option>
+				{% endfor %}
+			</select>
+			<span id="nl_batch_custom" class="nl-custom"{% if not S_BATCH_CUSTOM %} style="display: none;"{% endif %}>
+				<label for="nl_batch">{{ lang('NL_CUSTOM_VALUE') }}{{ lang('COLON') }}</label>
+				<input type="number" id="nl_batch" name="nl_batch" value="{{ NL_BATCH }}" min="10" max="100" step="1" class="post" /> {{ lang('NL_EMAILS') }}
+			</span>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="nl_interval_preset">{{ lang('NL_INTERVAL') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_INTERVAL_EXPLAIN') }}</span></dt>
+		<dd>
+			<select id="nl_interval_preset" name="nl_interval_preset" data-nl-toggle="nl_interval_custom">
+				{% for voce in intervalli %}
+					<option value="{{ voce.VALUE }}"{% if voce.S_SELECTED %} selected="selected"{% endif %}>{{ voce.NAME }}</option>
+				{% endfor %}
+			</select>
+			<span id="nl_interval_custom" class="nl-custom"{% if not S_INTERVAL_CUSTOM %} style="display: none;"{% endif %}>
+				<label for="nl_interval">{{ lang('NL_CUSTOM_VALUE') }}{{ lang('COLON') }}</label>
+				<input type="time" id="nl_interval" name="nl_interval" value="{{ NL_INTERVAL }}" step="1" pattern="[0-9]{2}:[0-9]{2}:[0-9]{2}" class="post" />
+				<span class="nl-hint">{{ lang('NL_INTERVAL_HINT') }}</span>
+			</span>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="nl_schedule">{{ lang('NL_SCHEDULE') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_SCHEDULE_EXPLAIN') }}</span></dt>
+		<dd><input type="datetime-local" id="nl_schedule" name="nl_schedule" value="{{ NL_SCHEDULE }}" class="post" /></dd>
+	</dl>
+</fieldset>
+
+<fieldset>
+	<legend>{{ lang('NL_TEST') }}</legend>
+
+	<dl>
+		<dt><label for="nl_test_email">{{ lang('NL_TEST_EMAIL') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_TEST_EMAIL_EXPLAIN') }}</span></dt>
+		<dd><input type="email" id="nl_test_email" name="nl_test_email" value="{{ NL_TEST_EMAIL }}" maxlength="100" class="inputbox" /></dd>
+	</dl>
+</fieldset>
+
+<fieldset class="submit-buttons">
+	<legend>{{ lang('SUBMIT') }}</legend>
+	<input type="hidden" name="campaign_id" value="{{ CAMPAIGN_ID }}" />
+	<p class="nl-hint">{{ lang('NL_BUTTON_DEFAULTS_EXPLAIN') }}</p>
+	<input class="button2" type="submit" name="submit_preview" value="{{ lang('NL_BUTTON_PREVIEW') }}" />
+	<input class="button2" type="submit" name="submit_test" value="{{ lang('NL_BUTTON_TEST') }}" />
+	<input class="button2" type="submit" name="submit_defaults" value="{{ lang('NL_BUTTON_DEFAULTS') }}" />
+	<input class="button2" type="submit" name="submit_draft" value="{{ lang('NL_BUTTON_DRAFT') }}" />
+	<input class="button1" type="submit" name="submit_prepare" value="{{ lang('NL_BUTTON_PREPARE') }}" />
+	{{ S_FORM_TOKEN }}
+</fieldset>
+
+</form>
+
+<script type="text/javascript">
+// Mostra il campo libero solo quando nella tendina si sceglie "personalizzato".
+// Senza script la pagina resta usabile: il campo parte visibile se il valore in
+// uso non e fra quelli proposti, e in ogni caso il modulo tiene per buona la
+// tendina quando questa vale piu di zero.
+(function () {
+	// Banner e foglio di stile riguardano i formati ricchi: in testo semplice
+	// non ci sarebbe modo di mostrare una immagine ne di applicare uno stile.
+	// La barra dei tag riguarda invece il solo BBCode
+	var formato = document.querySelectorAll('input[name="nl_format"]');
+	var riquadro = document.getElementById('nl_banner_box');
+	var barra = document.getElementById('nl_bbcode_bar');
+	var suggerimento = document.getElementById('nl_bbcode_hint');
+	var pannelli = document.querySelectorAll('.nl-panel');
+
+	var chiudiPannelli = function (tranne) {
+		for (var p = 0; p < pannelli.length; p++) {
+			if (pannelli[p] !== tranne) {
+				pannelli[p].style.display = 'none';
+			}
+		}
+	};
+
+	var formatoCorrente = function () {
+		for (var k = 0; k < formato.length; k++) {
+			if (formato[k].checked) {
+				return formato[k].value;
+			}
+		}
+
+		return '0';
+	};
+
+	if (formato.length) {
+		var aggiornaFormato = function () {
+			var f = formatoCorrente();
+
+			if (riquadro) {
+				riquadro.style.display = (f !== '0') ? '' : 'none';
+			}
+
+			if (barra) {
+				barra.style.display = (f === '2') ? '' : 'none';
+			}
+
+			if (suggerimento) {
+				suggerimento.style.display = (f === '2') ? '' : 'none';
+			}
+
+			// Nascondere la barra non basta: tavolozza, dimensioni e faccine
+			// sono pannelli a se, fuori dalla barra, e resterebbero aperti
+			// sotto un formato che non li prevede
+			if (f !== '2') {
+				chiudiPannelli(null);
+			}
+		};
+
+		for (var j = 0; j < formato.length; j++) {
+			formato[j].addEventListener('change', aggiornaFormato);
+		}
+
+		aggiornaFormato();
+	}
+
+	// Inserimento dei tag attorno al testo selezionato. Non e l'editor
+	// completo del forum, ma copre i tag che servono davvero in una newsletter
+	// e non trascina dentro il pannello mezzo javascript di prosilver
+	var corpo = document.getElementById('nl_body');
+
+	if (barra && corpo) {
+		var pulsanti = barra.querySelectorAll('button[data-nl-tag]');
+
+		var inserisci = function (tag, attributo, interno) {
+			var inizio = corpo.selectionStart;
+			var fine = corpo.selectionEnd;
+			var scelto = corpo.value.substring(inizio, fine);
+
+			var apre = '[' + tag + (attributo ? '=' + attributo : '') + ']';
+			var chiude = '[/' + tag + ']';
+			var dentro = scelto || (interno || '');
+
+			corpo.value = corpo.value.substring(0, inizio) + apre + dentro + chiude + corpo.value.substring(fine);
+
+			// Il cursore torna dentro il tag appena inserito, cosi si puo
+			// continuare a scrivere senza andarlo a cercare col mouse
+			var posizione = inizio + apre.length + dentro.length;
+			corpo.focus();
+			corpo.setSelectionRange(posizione, posizione);
+		};
+
+		for (var b = 0; b < pulsanti.length; b++) {
+			pulsanti[b].addEventListener('click', function (evento) {
+				var pulsante = evento.currentTarget;
+				var domanda = pulsante.getAttribute('data-nl-prompt');
+				var attributo = '';
+
+				if (domanda) {
+					attributo = window.prompt(domanda, pulsante.getAttribute('data-nl-default') || '');
+
+					if (attributo === null) {
+						return;
+					}
+				}
+
+				inserisci(pulsante.getAttribute('data-nl-tag'), attributo, pulsante.getAttribute('data-nl-inner'));
+			});
+		}
+
+		// Inserimento di testo semplice, senza avvolgere nulla: serve alle
+		// faccine, che sono codici e non tag
+		var inserisciGrezzo = function (testo) {
+			var inizio = corpo.selectionStart;
+			var fine = corpo.selectionEnd;
+
+			// Uno spazio prima e dopo, se non c'e gia: attaccata a una parola
+			// la faccina non viene riconosciuta dal motore
+			var prima = corpo.value.substring(0, inizio);
+			var dopo = corpo.value.substring(fine);
+			var sinistra = (prima === '' || /\s$/.test(prima)) ? '' : ' ';
+			var destra = (dopo === '' || /^\s/.test(dopo)) ? '' : ' ';
+
+			corpo.value = prima + sinistra + testo + destra + dopo;
+
+			var posizione = inizio + sinistra.length + testo.length + destra.length;
+			corpo.focus();
+			corpo.setSelectionRange(posizione, posizione);
+		};
+
+		// Pannelli a scomparsa: colore, dimensione, faccine
+		var apribili = barra.querySelectorAll('button[data-nl-panel]');
+
+		for (var a = 0; a < apribili.length; a++) {
+			apribili[a].addEventListener('click', function (evento) {
+				var pannello = document.getElementById(evento.currentTarget.getAttribute('data-nl-panel'));
+
+				if (!pannello) {
+					return;
+				}
+
+				var aperto = (pannello.style.display !== 'none');
+				chiudiPannelli(pannello);
+				pannello.style.display = aperto ? 'none' : '';
+
+				if (!aperto && pannello.id === 'nl_panel_color') {
+					costruisciTavolozza();
+				}
+			});
+		}
+
+		// Tavolozza costruita con lo stesso schema di phpBB: cinque livelli per
+		// canale danno le 125 tinte che si trovano nell'editor del forum, cosi
+		// chi scrive ritrova i colori a cui e abituato
+		var tavolozzaFatta = false;
+
+		var costruisciTavolozza = function () {
+			var contenitore = document.getElementById('nl_palette');
+
+			if (!contenitore || tavolozzaFatta) {
+				return;
+			}
+
+			var livelli = ['00', '40', '80', 'BF', 'FF'];
+			var html = '';
+
+			for (var r = 0; r < 5; r++) {
+				html += '<div class="nl-palette-row">';
+
+				for (var g = 0; g < 5; g++) {
+					for (var bl = 0; bl < 5; bl++) {
+						var colore = '#' + livelli[r] + livelli[g] + livelli[bl];
+						html += '<button type="button" class="nl-swatch" data-nl-color="' + colore + '" title="' + colore + '" style="background:' + colore + ';"></button>';
+					}
+				}
+
+				html += '</div>';
+			}
+
+			contenitore.innerHTML = html;
+			tavolozzaFatta = true;
+
+			var campioni = contenitore.querySelectorAll('button[data-nl-color]');
+
+			for (var c = 0; c < campioni.length; c++) {
+				campioni[c].addEventListener('click', function (evento) {
+					inserisci('color', evento.currentTarget.getAttribute('data-nl-color'), '');
+					chiudiPannelli(null);
+				});
+			}
+		};
+
+		// Colore libero, per chi ha una tinta precisa in mente
+		var scelto = document.getElementById('nl_color_custom');
+		var applica = document.getElementById('nl_color_apply');
+
+		if (scelto && applica) {
+			applica.addEventListener('click', function () {
+				inserisci('color', scelto.value, '');
+				chiudiPannelli(null);
+			});
+		}
+
+		var dimensioni = document.querySelectorAll('button[data-nl-size]');
+
+		for (var d = 0; d < dimensioni.length; d++) {
+			dimensioni[d].addEventListener('click', function (evento) {
+				inserisci('size', evento.currentTarget.getAttribute('data-nl-size'), '');
+				chiudiPannelli(null);
+			});
+		}
+
+		var faccine = document.querySelectorAll('button[data-nl-code]');
+
+		for (var f = 0; f < faccine.length; f++) {
+			faccine[f].addEventListener('click', function (evento) {
+				inserisciGrezzo(evento.currentTarget.getAttribute('data-nl-code'));
+			});
+		}
+	}
+
+	// Le scelte non ancora inviate vengono tenute per la durata della
+	// sessione del browser: cambiando scheda del pannello e tornando indietro
+	// il modulo non e ancora passato dal server, e senza questo il formato
+	// tornerebbe a quello predefinito. Riguarda solo le scelte, non oggetto e
+	// corpo: quelli non vanno mai ripristinati a sorpresa
+	var CAMPI = ['nl_format', 'nl_banner', 'nl_subs', 'nl_lang', 'nl_priority',
+		'nl_importance', 'nl_sensitivity', 'nl_batch_preset', 'nl_interval_preset'];
+
+	var ripristinabile = document.getElementById('nl_restore');
+	var memoria = null;
+
+	try {
+		memoria = window.sessionStorage;
+	} catch (e) {
+		memoria = null;
+	}
+
+	var leggi = function (nome) {
+		var campi = document.getElementsByName(nome);
+
+		if (!campi.length) {
+			return null;
+		}
+
+		if (campi[0].type === 'radio') {
+			for (var i = 0; i < campi.length; i++) {
+				if (campi[i].checked) {
+					return campi[i].value;
+				}
+			}
+
+			return null;
+		}
+
+		if (campi[0].type === 'checkbox') {
+			return campi[0].checked ? '1' : '0';
+		}
+
+		return campi[0].value;
+	};
+
+	var scrivi = function (nome, valore) {
+		var campi = document.getElementsByName(nome);
+
+		if (!campi.length || valore === null) {
+			return;
+		}
+
+		if (campi[0].type === 'radio') {
+			for (var i = 0; i < campi.length; i++) {
+				campi[i].checked = (campi[i].value === valore);
+			}
+		} else if (campi[0].type === 'checkbox') {
+			campi[0].checked = (valore === '1');
+		} else {
+			campi[0].value = valore;
+		}
+
+		campi[0].dispatchEvent(new Event('change', { bubbles: true }));
+	};
+
+	if (memoria) {
+		if (ripristinabile && ripristinabile.value === '1') {
+			for (var n = 0; n < CAMPI.length; n++) {
+				scrivi(CAMPI[n], memoria.getItem('nl_' + CAMPI[n]));
+			}
+		}
+
+		var salva = function () {
+			for (var m = 0; m < CAMPI.length; m++) {
+				var v = leggi(CAMPI[m]);
+
+				if (v !== null) {
+					memoria.setItem('nl_' + CAMPI[m], v);
+				}
+			}
+		};
+
+		for (var c = 0; c < CAMPI.length; c++) {
+			var elementi = document.getElementsByName(CAMPI[c]);
+
+			for (var e = 0; e < elementi.length; e++) {
+				elementi[e].addEventListener('change', salva);
+			}
+		}
+	}
+
+	// Esploratore della cartella images: le cartelle si aprono a richiesta e
+	// non tutte insieme. Con avatars e smilies dentro, un albero costruito per
+	// intero al caricamento della pagina significherebbe migliaia di voci
+	// servite ogni volta, quasi sempre per non guardarne nessuna
+	var apriEsplora = document.getElementById('nl_browse_toggle');
+	var riquadroEsplora = document.getElementById('nl_browse');
+
+	if (apriEsplora && riquadroEsplora) {
+		var elenco = document.getElementById('nl_browse_list');
+		var percorso = document.getElementById('nl_browse_path');
+		var suPulsante = document.getElementById('nl_browse_up');
+		var miniatura = document.getElementById('nl_browse_thumb');
+		var informazioni = document.getElementById('nl_browse_info');
+		var scelto = document.getElementById('nl_banner_pick');
+		var usaPulsante = document.getElementById('nl_browse_use');
+		var indirizzoBase = apriEsplora.getAttribute('data-nl-url').replace(/&amp;/g, '&');
+		var cartellaCorrente = '';
+		var caricato = false;
+
+		var minH = parseInt('{{ NL_BANNER_MIN_H }}', 10);
+		var maxH = parseInt('{{ NL_BANNER_MAX_H }}', 10);
+		var minW = parseInt('{{ NL_BANNER_MIN_W }}', 10);
+		var maxW = parseInt('{{ NL_BANNER_MAX_W }}', 10);
+
+		var carica = function (cartella) {
+			elenco.innerHTML = '<p class="nl-hint">{{ lang('NL_BANNER_PICK_LOADING') }}</p>';
+
+			var richiesta = new XMLHttpRequest();
+			richiesta.open('GET', indirizzoBase + '&dir=' + encodeURIComponent(cartella), true);
+
+			richiesta.onload = function () {
+				var dati;
+
+				try {
+					dati = JSON.parse(richiesta.responseText);
+				} catch (e) {
+					elenco.innerHTML = '<p class="nl-warn">{{ lang('NL_BANNER_PICK_FAILED') }}</p>';
+					return;
+				}
+
+				if (dati.error) {
+					elenco.innerHTML = '<p class="nl-warn"></p>';
+					elenco.firstChild.textContent = dati.error;
+					return;
+				}
+
+				cartellaCorrente = dati.path || '';
+				percorso.textContent = 'images/' + cartellaCorrente;
+				suPulsante.disabled = (cartellaCorrente === '');
+
+				var html = '';
+				var i;
+
+				for (i = 0; i < dati.dirs.length; i++) {
+					html += '<button type="button" class="nl-browse-item nl-browse-dir" data-nl-dir="' +
+						dati.dirs[i].path.replace(/"/g, '&quot;') + '">&#128193; ' +
+						dati.dirs[i].name.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</button>';
+				}
+
+				for (i = 0; i < dati.files.length; i++) {
+					html += '<button type="button" class="nl-browse-item nl-browse-file" data-nl-file="' +
+						dati.files[i].path.replace(/"/g, '&quot;') + '" data-nl-url="' +
+						dati.files[i].url.replace(/"/g, '&quot;') + '" data-nl-size="' + dati.files[i].size + '">&#128444; ' +
+						dati.files[i].name.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</button>';
+				}
+
+				if (html === '') {
+					html = '<p class="nl-hint">{{ lang('NL_BANNER_PICK_EMPTY') }}</p>';
+				}
+
+				if (dati.truncated) {
+					html += '<p class="nl-hint">{{ lang('NL_BANNER_PICK_TRUNCATED') }}</p>';
+				}
+
+				elenco.innerHTML = html;
+				collega();
+			};
+
+			richiesta.onerror = function () {
+				elenco.innerHTML = '<p class="nl-warn">{{ lang('NL_BANNER_PICK_FAILED') }}</p>';
+			};
+
+			richiesta.send();
+		};
+
+		var collega = function () {
+			var cartelle = elenco.querySelectorAll('button[data-nl-dir]');
+			var file = elenco.querySelectorAll('button[data-nl-file]');
+			var i;
+
+			for (i = 0; i < cartelle.length; i++) {
+				cartelle[i].addEventListener('click', function (evento) {
+					carica(evento.currentTarget.getAttribute('data-nl-dir'));
+				});
+			}
+
+			for (i = 0; i < file.length; i++) {
+				file[i].addEventListener('click', function (evento) {
+					var pulsante = evento.currentTarget;
+					var attivi = elenco.querySelectorAll('.nl-browse-item.attivo');
+
+					for (var k = 0; k < attivi.length; k++) {
+						attivi[k].classList.remove('attivo');
+					}
+
+					pulsante.classList.add('attivo');
+					mostra(pulsante.getAttribute('data-nl-file'), pulsante.getAttribute('data-nl-url'), pulsante.getAttribute('data-nl-size'));
+				});
+			}
+		};
+
+		var mostra = function (rel, url, peso) {
+			scelto.value = rel;
+			miniatura.innerHTML = '';
+
+			var img = document.createElement('img');
+
+			img.onload = function () {
+				var w = img.naturalWidth;
+				var h = img.naturalHeight;
+				var adatta = (h >= minH && h <= maxH && w >= minW && w <= maxW);
+
+				informazioni.textContent = w + ' \u00d7 ' + h + ' px, ' + peso + ' KB';
+				informazioni.className = adatta ? 'nl-hint' : 'nl-warn';
+
+				// Il controllo vero lo rifa il server al momento della scelta:
+				// questo serve solo a non far premere un pulsante che darebbe
+				// comunque errore
+				if (!adatta) {
+					informazioni.textContent += ' \u2014 {{ lang('NL_BANNER_PICK_BAD') }}';
+				}
+
+				usaPulsante.disabled = !adatta;
+			};
+
+			img.onerror = function () {
+				informazioni.textContent = '{{ lang('NL_BANNER_PICK_FAILED') }}';
+				informazioni.className = 'nl-warn';
+				usaPulsante.disabled = true;
+			};
+
+			img.src = url;
+			miniatura.appendChild(img);
+		};
+
+		apriEsplora.addEventListener('click', function () {
+			var aperto = (riquadroEsplora.style.display !== 'none');
+			riquadroEsplora.style.display = aperto ? 'none' : '';
+
+			if (!aperto && !caricato) {
+				caricato = true;
+				carica('');
+			}
+		});
+
+		suPulsante.addEventListener('click', function () {
+			var pezzi = cartellaCorrente.split('/');
+			pezzi.pop();
+			carica(pezzi.join('/'));
+		});
+	}
+
+	// Cambiando notiziario, i gruppi proposti da quel notiziario vengono
+	// selezionati. Solo se l'amministratore non ha gia scelto a mano:
+	// sovrascrivere una selezione appena fatta sarebbe peggio che non aiutare
+	var tendinaLista = document.getElementById('nl_list');
+	var elencoGruppi = document.getElementById('nl_groups');
+
+	if (tendinaLista && elencoGruppi) {
+		var toccatoAMano = false;
+
+		elencoGruppi.addEventListener('change', function () {
+			toccatoAMano = true;
+		});
+
+		tendinaLista.addEventListener('change', function () {
+			if (toccatoAMano) {
+				return;
+			}
+
+			var opzione = tendinaLista.options[tendinaLista.selectedIndex];
+			var proposti = (opzione.getAttribute('data-nl-groups') || '').split(',');
+
+			if (proposti.length === 1 && proposti[0] === '') {
+				return;
+			}
+
+			for (var g = 0; g < elencoGruppi.options.length; g++) {
+				elencoGruppi.options[g].selected = (proposti.indexOf(elencoGruppi.options[g].value) !== -1);
+			}
+		});
+	}
+
+	var tendine = document.querySelectorAll('select[data-nl-toggle]');
+
+	for (var i = 0; i < tendine.length; i++) {
+		(function (tendina) {
+			var campo = document.getElementById(tendina.getAttribute('data-nl-toggle'));
+
+			if (!campo) {
+				return;
+			}
+
+			var aggiorna = function () {
+				campo.style.display = (parseInt(tendina.value, 10) === 0) ? '' : 'none';
+			};
+
+			tendina.addEventListener('change', aggiorna);
+			aggiorna();
+		})(tendine[i]);
+	}
+})();
+</script>
+
+<!-- INCLUDE overall_footer.html -->

@@ -1,0 +1,31 @@
+<!-- INCLUDECSS @salvocortesiano_newsletter/newsletter.css -->
+<!-- INCLUDE overall_header.html -->
+
+<p class="nl-crumb"><a href="{{ U_NL_ARCHIVE }}">&laquo; {{ lang('NL_ARCHIVE_TITLE') }}</a></p>
+
+<h2 class="newsletter-title">{{ NL_SUBJECT }}</h2>
+
+<div class="panel">
+	<div class="inner">
+
+		<p class="nl-archive-meta">
+			{% if NL_LIST_NAME %}{% if U_NL_LIST %}<a href="{{ U_NL_LIST }}">{{ NL_LIST_NAME }}</a>{% else %}{{ NL_LIST_NAME }}{% endif %} &middot; {% endif %}
+			{{ NL_DATE }} &middot; {{ NL_AUTHOR }} &middot;
+			{{ lang('NL_ARCHIVE_SENT_TO', NL_RECIPIENTS) }} &middot;
+			{{ NL_VIEWS }} {{ lang('NL_ARCHIVE_VIEWS') }}
+		</p>
+
+		{% if S_NL_HTML %}
+			<iframe class="nl-frame" title="{{ NL_SUBJECT }}" sandbox="allow-popups allow-popups-to-escape-sandbox" srcdoc="{{ NL_BODY_HTML }}"></iframe>
+		{% else %}
+			<div class="nl-plain">{{ NL_BODY_TEXT }}</div>
+		{% endif %}
+
+		{% if S_NL_CAN_SUBSCRIBE %}
+			<p><a class="nl-cta" href="{{ U_NL_SUBSCRIBE }}">{{ lang('NL_ARCHIVE_SUBSCRIBE') }}</a></p>
+		{% endif %}
+
+	</div>
+</div>
+
+<!-- INCLUDE overall_footer.html -->

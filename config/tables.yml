@@ -1,0 +1,6 @@
+parameters:
+    salvocortesiano.newsletter.tables.campaigns: '%core.table_prefix%newsletter_campaigns'
+    salvocortesiano.newsletter.tables.queue: '%core.table_prefix%newsletter_queue'
+    salvocortesiano.newsletter.tables.subs: '%core.table_prefix%newsletter_subs'
+    salvocortesiano.newsletter.tables.lists: '%core.table_prefix%newsletter_lists'
+    salvocortesiano.newsletter.tables.list_subs: '%core.table_prefix%newsletter_list_subs'

@@ -1,0 +1,120 @@
+<!-- INCLUDE overall_header.html -->
+
+<link href="{{ U_NL_ACP_CSS }}" rel="stylesheet" type="text/css" media="screen" />
+
+<a id="maincontent"></a>
+
+<h1>{{ lang('ACP_NEWSLETTER_SUBS') }}</h1>
+
+<div class="nl-identity">
+	<p class="nl-shields">
+		{% if NL_VERSION %}
+			<span class="nl-shield"><span class="nl-shield-label">{{ lang('NL_SHIELD_VERSION') }}</span><span class="nl-shield-value nl-shield-blue">{{ NL_VERSION }}</span></span>
+		{% endif %}
+		<span class="nl-shield"><span class="nl-shield-label">{{ lang('NL_SUBSCRIBERS_LABEL') }}</span><span class="nl-shield-value nl-shield-green">{{ NL_UNIQUE_SUBS }}</span></span>
+		<span class="nl-shield" title="{% if NL_PHPBB_REQUIRED %}{{ lang('NL_SHIELD_REQUIRES', NL_PHPBB_REQUIRED) }}{% endif %}">
+			<span class="nl-shield-label">phpBB</span><span class="nl-shield-value {% if S_NL_PHPBB_OK %}nl-shield-green{% else %}nl-shield-red{% endif %}">{{ NL_PHPBB_VERSION }}</span>
+		</span>
+		<span class="nl-shield"><span class="nl-shield-label">{{ lang('NL_SHIELD_LICENSE') }}</span><span class="nl-shield-value nl-shield-grey">GPL-2.0</span></span>
+	</p>
+</div>
+
+<p>{{ lang('ACP_NEWSLETTER_SUBS_EXPLAIN') }}</p>
+
+{% if not S_SUBS_ENABLED %}
+	<div class="errorbox">
+		<h3>{{ lang('WARNING') }}</h3>
+		<p>{{ lang('NL_SUBS_DISABLED_WARNING', '<a href="' ~ U_SETTINGS ~ '">', '</a>') }}</p>
+	</div>
+{% endif %}
+
+<form id="newsletter_subs_search" method="post" action="{{ U_ACTION }}">
+<fieldset>
+	<legend>{{ lang('NL_SEARCH') }}</legend>
+	<dl>
+		<dt><label for="cerca">{{ lang('NL_SEARCH') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_SEARCH_EXPLAIN') }}</span></dt>
+		<dd>
+			<input type="search" id="cerca" name="cerca" value="{{ NL_SEARCH }}" maxlength="100" class="inputbox" />
+			<input class="button2" type="submit" value="{{ lang('NL_BUTTON_SEARCH') }}" />
+			{% if S_SEARCHING %}
+				<a class="button2" href="{{ U_CLEAR_SEARCH }}">{{ lang('NL_BUTTON_CLEAR') }}</a>
+			{% endif %}
+		</dd>
+	</dl>
+</fieldset>
+</form>
+
+<fieldset class="tabulated">
+	<legend>{{ lang('NL_SUBSCRIBERS_LABEL') }}</legend>
+
+	{% if filtri_lista %}
+		<p class="quick">
+			{{ lang('NL_LIST_FILTER') }}{{ lang('COLON') }}
+			{% for filtro in filtri_lista %}
+				{% if not loop.first %} &middot; {% endif %}
+				{% if filtro.S_SELECTED %}<strong>{{ filtro.NAME }} ({{ filtro.COUNT }})</strong>{% else %}<a href="{{ filtro.U_FILTER }}">{{ filtro.NAME }} ({{ filtro.COUNT }})</a>{% endif %}
+			{% endfor %}
+			&middot; <a href="{{ U_LISTS }}">{{ lang('NL_LIST_MANAGE') }}</a>
+		</p>
+	{% endif %}
+
+	<p class="quick">
+		{% if S_SEARCHING %}
+			{{ lang('NL_SUBS_FOUND', NL_FOUND_SUBS, NL_TOTAL_SUBS) }}
+		{% else %}
+			{{ lang('NL_SUBS_TOTAL', NL_TOTAL_SUBS) }}
+		{% endif %}
+	</p>
+
+	<table class="table1">
+		<thead>
+		<tr>
+			<th><a href="{{ U_SORT_USERNAME }}">{{ lang('USERNAME') }}{% if S_SORTED_USERNAME %} <span class="nl-arrow">{% if S_SORT_ASC %}&#9650;{% else %}&#9660;{% endif %}</span>{% endif %}</a></th>
+			{% if S_NL_MULTI %}<th style="width: 160px;">{{ lang('NL_LIST') }}</th>{% endif %}
+			<th style="width: 240px;"><a href="{{ U_SORT_SUB_EMAIL }}">{{ lang('NL_SUB_EMAIL') }}{% if S_SORTED_SUB_EMAIL %} <span class="nl-arrow">{% if S_SORT_ASC %}&#9650;{% else %}&#9660;{% endif %}</span>{% endif %}</a></th>
+			<th style="width: 260px;"><a href="{{ U_SORT_SUB_TIME }}">{{ lang('NL_SUB_DATE') }}{% if S_SORTED_SUB_TIME %} <span class="nl-arrow">{% if S_SORT_ASC %}&#9650;{% else %}&#9660;{% endif %}</span>{% endif %}</a></th>
+			<th style="width: 120px;">{{ lang('NL_SUB_IP') }}</th>
+			<th style="width: 110px;">{{ lang('ACTION') }}</th>
+		</tr>
+		</thead>
+		<tbody>
+		{% for iscritto in iscritti %}
+			<tr>
+				<td>
+					<a href="{{ iscritto.U_PROFILE }}">{{ iscritto.USERNAME }}</a>
+					{% if iscritto.S_MASSEMAIL_OFF %}
+						<br /><span class="nl-flag nl-flag-warn" title="{{ lang('NL_MASSEMAIL_OFF_EXPLAIN') }}">{{ lang('NL_MASSEMAIL_OFF') }}</span>
+					{% endif %}
+					{% if iscritto.S_NO_EMAIL %}
+						<br /><span class="nl-flag nl-flag-warn">{{ lang('NL_SUB_NO_EMAIL') }}</span>
+					{% endif %}
+				</td>
+				{% if S_NL_MULTI %}<td>{{ iscritto.LIST_NAME }}</td>{% endif %}
+				<td>
+					<span class="nl-email">{{ iscritto.EMAIL }}</span>
+					{% if iscritto.S_EMAIL_CHANGED %}
+						<br /><span class="small nl-hint">{{ lang('NL_SUB_EMAIL_CHANGED') }}{{ lang('COLON') }} <span class="nl-email">{{ iscritto.CURRENT_EMAIL }}</span></span>
+					{% endif %}
+				</td>
+				<td>{{ lang('NL_SUB_SINCE') }}{{ lang('COLON') }} {{ iscritto.SUB_DATE }}</td>
+				<td style="text-align: center;"><span class="small">{{ iscritto.SUB_IP }}</span></td>
+				<td style="text-align: center;"><a href="{{ iscritto.U_UNSUB }}">{{ lang('NL_ACTION_UNSUB') }}</a></td>
+			</tr>
+		{% else %}
+			<tr>
+				<td colspan="{% if S_NL_MULTI %}6{% else %}5{% endif %}" style="text-align: center;">
+					{% if S_SEARCHING %}{{ lang('NL_NO_RESULTS') }}{% else %}{{ lang('NL_SUBS_NONE') }}{% endif %}
+				</td>
+			</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+</fieldset>
+
+<!-- IF .pagination -->
+	<div class="pagination">
+		<!-- INCLUDE pagination.html -->
+	</div>
+<!-- ENDIF -->
+
+<!-- INCLUDE overall_footer.html -->

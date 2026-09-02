@@ -1,0 +1,102 @@
+<!-- INCLUDECSS @salvocortesiano_newsletter/newsletter.css -->
+<!-- INCLUDE ucp_header.html -->
+
+<h2>{{ lang('UCP_NEWSLETTER') }}</h2>
+
+<div class="panel">
+	<div class="inner">
+
+		{% if NL_MESSAGE %}
+			<div class="nl-box nl-box-ok"><strong>{{ NL_MESSAGE }}</strong></div>
+		{% endif %}
+
+		{% if NL_ERROR %}
+			<div class="nl-box nl-box-bad"><strong>{{ NL_ERROR }}</strong></div>
+		{% endif %}
+
+		<p>{{ lang('NL_UCP_EXPLAIN', NL_BOARD_NAME) }}</p>
+
+		{% if NL_INTRO %}
+			<div class="nl-box">{{ NL_INTRO }}</div>
+		{% endif %}
+
+		{% if not S_NL_ENABLED %}
+			<div class="nl-box nl-box-bad">{{ lang('NL_SUBS_CLOSED') }}</div>
+		{% else %}
+
+			<fieldset class="fields2">
+				<dl>
+					<dt><label>{{ lang('NL_UCP_EMAIL') }}{{ lang('COLON') }}</label></dt>
+					<dd>
+						{% if S_NL_HAS_EMAIL %}
+							<span class="nl-email">{{ NL_EMAIL }}</span> &middot; <a href="{{ U_NL_CHANGE_EMAIL }}">{{ lang('NL_UCP_CHANGE_EMAIL') }}</a>
+						{% else %}
+							<strong>{{ lang('NL_NO_EMAIL') }}</strong>
+						{% endif %}
+					</dd>
+				</dl>
+			</fieldset>
+
+			<form id="ucp_newsletter" method="post" action="{{ U_ACTION }}">
+
+			<input type="hidden" name="i" value="{{ NL_MODULE_ID }}" />
+			<input type="hidden" name="mode" value="{{ NL_MODULE_MODE }}" />
+
+			{% if S_NL_LISTS %}
+				<fieldset>
+					<legend>{{ lang('NL_UCP_CHOICE') }}</legend>
+					<p>{{ lang('NL_UCP_CHOICE_EXPLAIN') }}</p>
+					<p class="nl-box"><strong>{{ lang('NL_UCP_HOW') }}</strong></p>
+
+					<ul class="nl-lists">
+						{% for notiziario in notiziari %}
+							<li class="nl-list-item">
+								<label>
+									<input type="checkbox" name="nl_lists[]" value="{{ notiziario.LIST_ID }}"{% if notiziario.S_CHECKED %} checked="checked"{% endif %}{% if notiziario.S_CLOSED and not notiziario.S_CHECKED %} disabled="disabled"{% endif %} class="radio" />
+									<strong>{{ notiziario.NAME }}</strong>
+									{% if notiziario.S_CLOSED %} <span class="nl-flag">{{ lang('NL_LIST_CLOSED') }}</span>{% endif %}
+								</label>
+								{% if notiziario.DESCRIPTION %}<div class="nl-list-desc">{{ notiziario.DESCRIPTION }}</div>{% endif %}
+								<div class="nl-list-meta">
+									{% if notiziario.S_CHECKED %}
+										<strong class="nl-state-on">{{ lang('NL_UCP_SUBSCRIBED') }}</strong>
+									{% else %}
+										<span class="nl-state-off">{{ lang('NL_UCP_NOT_SUBSCRIBED') }}</span>
+									{% endif %}
+									&middot; {{ lang('NL_UCP_SUBSCRIBERS') }}{{ lang('COLON') }} {{ notiziario.SUBSCRIBERS }}
+									{% if notiziario.SINCE %} &middot; {{ lang('NL_SUB_SINCE') }}{{ lang('COLON') }} {{ notiziario.SINCE }}{% endif %}
+									{% if notiziario.U_UNSUB %} &middot; <a href="{{ notiziario.U_UNSUB }}" class="nl-unsub-link">{{ lang('NL_UCP_UNSUB_ONE') }}</a>{% endif %}
+								</div>
+							</li>
+						{% endfor %}
+					</ul>
+
+					<fieldset class="fields2">
+						<dl>
+							<dt>&nbsp;</dt>
+							<dd><input type="submit" name="submit" value="{{ lang('SUBMIT') }}" class="button1" /></dd>
+						</dl>
+					</fieldset>
+				</fieldset>
+			{% else %}
+				<p>{{ lang('NL_UCP_NO_LISTS') }}</p>
+			{% endif %}
+
+			{{ S_FORM_TOKEN }}
+			</form>
+
+			{% if U_NL_UNSUB_ALL %}
+				<p class="nl-box">
+					{{ lang('NL_UCP_UNSUB_ALL_EXPLAIN') }}
+					<a href="{{ U_NL_UNSUB_ALL }}"><strong>{{ lang('NL_UCP_UNSUB_ALL') }}</strong></a>
+				</p>
+			{% endif %}
+
+			<p class="rules-link"><a href="{{ U_NL_PREFS }}">{{ lang('NL_UCP_PREFS_LINK') }}</a></p>
+
+		{% endif %}
+
+	</div>
+</div>
+
+<!-- INCLUDE ucp_footer.html -->

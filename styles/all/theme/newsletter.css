@@ -1,0 +1,318 @@
+/**
+ * Newsletter - fogli di stile lato forum
+ */
+
+/*
+ * I colori sono dichiarati per esteso, testo compreso, e non lasciati
+ * all'eredita dello stile: su un tema scuro il testo del forum e chiaro, e
+ * sopra uno sfondo chiaro fissato da noi sparirebbe. Vale sia per il testo
+ * sia per i collegamenti, che hanno un colore proprio in ogni stile.
+ */
+
+.nl-box {
+	margin: 12px 0;
+	padding: 14px 16px;
+	border: 1px solid #d5d5d5;
+	border-radius: 4px;
+	background: #f7f7f7;
+	color: #333333;
+}
+
+.nl-box a {
+	color: #0f5d9d;
+	text-decoration: underline;
+}
+
+.nl-box a:hover {
+	color: #0a4373;
+}
+
+.nl-box-ok a {
+	color: #245f27;
+}
+
+.nl-box-bad a {
+	color: #8e2039;
+}
+
+/* Invito all'iscrizione: un pulsante vero, leggibile su qualsiasi tema */
+
+.nl-cta {
+	display: inline-block;
+	margin: 4px 0;
+	padding: 8px 16px;
+	border: 0;
+	border-radius: 4px;
+	background: #0f5d9d;
+	color: #ffffff !important;
+	font-weight: bold;
+	text-decoration: none !important;
+	line-height: 1.3;
+}
+
+.nl-cta:hover,
+.nl-cta:focus {
+	background: #0a4373;
+	color: #ffffff !important;
+	text-decoration: none !important;
+}
+
+.nl-box-ok {
+	border-color: #a8ceaa;
+	background: #eef7ee;
+	color: #245f27;
+}
+
+.nl-box-bad {
+	border-color: #e0aab6;
+	background: #fdeff2;
+	color: #8e2039;
+}
+
+.nl-state {
+	font-weight: bold;
+}
+
+.nl-state-on  { color: #2f8132; }
+.nl-state-off { color: #999999; }
+
+.nl-email {
+	font-family: Consolas, Monaco, "Courier New", monospace;
+}
+
+/* Archivio pubblico */
+
+.nl-crumb {
+	margin: 0 0 6px 0;
+	font-size: 11px;
+}
+
+/*
+ * L'elenco dei numeri usa le classi topiclist dello stile in uso, e il colore
+ * del titolo lo decide quello stile: dove il titolo e chiaro perche pensato
+ * per una riga scura, qui finisce chiaro su chiaro e diventa illeggibile.
+ * Sfondo e testo vengono quindi dichiarati per esteso, come per gli altri
+ * riquadri dell'estensione, cosi la lettura non dipende dal tema.
+ */
+
+.nl-archive-list .row {
+	background: #ffffff;
+	border-bottom: 1px solid #e3e3e3;
+}
+
+.nl-archive-list .row.bg2 {
+	background: #f7f9fa;
+}
+
+.nl-archive-list .row-item {
+	background-color: transparent;
+}
+
+.nl-archive-list a.topictitle {
+	color: #0f5d9d !important;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+.nl-archive-list a.topictitle:hover {
+	color: #0a4373 !important;
+	text-decoration: underline;
+}
+
+.nl-archive-meta {
+	color: #666666 !important;
+	font-size: 11px;
+}
+
+.nl-archive-views {
+	color: #666666 !important;
+	font-size: 11px;
+}
+
+.nl-archive-views dfn {
+	color: #666666 !important;
+}
+
+.nl-frame {
+	display: block;
+	width: 100%;
+	min-height: 620px;
+	margin: 12px 0;
+	border: 1px solid #d5d5d5;
+	border-radius: 4px;
+	background: #ffffff;
+}
+
+.nl-plain {
+	margin: 12px 0;
+	padding: 14px 16px;
+	border: 1px solid #d5d5d5;
+	border-radius: 4px;
+	background: #ffffff;
+	color: #333333;
+	line-height: 1.6;
+}
+
+/* Elenco dei notiziari nel pannello utente */
+
+.nl-lists {
+	list-style: none;
+	margin: 0 0 10px 0;
+	padding: 0;
+}
+
+.nl-list-item {
+	margin: 0 0 8px 0;
+	padding: 10px 12px;
+	border: 1px solid #d5d5d5;
+	border-radius: 4px;
+	background: #ffffff;
+	color: #333333;
+}
+
+.nl-list-item label {
+	cursor: pointer;
+}
+
+.nl-list-desc {
+	margin: 4px 0 0 22px;
+	color: #555555;
+	font-size: 12px;
+}
+
+.nl-list-meta {
+	margin: 4px 0 0 22px;
+	color: #888888;
+	font-size: 11px;
+}
+
+.nl-flag {
+	display: inline-block;
+	padding: 1px 6px;
+	font-size: 10px;
+	border-radius: 3px;
+	background: #eeeeee;
+	color: #666666;
+}
+
+.nl-archive-filter {
+	margin: 0 0 10px 0;
+	padding: 8px 10px;
+	background: #f4f4f4;
+	border-radius: 4px;
+	color: #333333;
+	font-size: 12px;
+}
+
+.nl-archive-filter a {
+	color: #0f5d9d;
+}
+
+.nl-unsub-link {
+	color: #8e2039 !important;
+}
+
+/*
+ * Barra BBCode nel pannello utente.
+ *
+ * Le stesse regole esistono nel foglio dell'amministrazione, ma quello nel
+ * pannello utente non viene caricato: senza queste, la barra comparirebbe
+ * senza forma e la tavolozza sarebbe un elenco di pulsanti vuoti.
+ */
+
+.nl-bbbar {
+	margin-bottom: 6px;
+}
+
+.nl-bbbar button {
+	min-width: 30px;
+	margin: 0 2px 3px 0;
+	padding: 3px 7px;
+	font-size: 12px;
+	line-height: 1.3;
+	cursor: pointer;
+}
+
+.nl-panel {
+	margin: 0 0 8px 0;
+	padding: 10px 12px;
+	background: #f7f7f7;
+	border: 1px solid #d5d5d5;
+	border-radius: 4px;
+	color: #333333;
+}
+
+.nl-panel-title {
+	margin: 0 0 8px 0;
+	font-size: 11px;
+	font-weight: bold;
+	color: #555555;
+}
+
+.nl-panel-foot {
+	margin: 8px 0 0 0;
+	font-size: 11px;
+}
+
+.nl-panel-foot label {
+	margin-right: 8px;
+}
+
+.nl-palette-row {
+	line-height: 0;
+	white-space: nowrap;
+}
+
+.nl-swatch {
+	display: inline-block;
+	width: 15px;
+	height: 12px;
+	margin: 0;
+	padding: 0;
+	min-width: 0;
+	border: 1px solid #ffffff;
+	cursor: pointer;
+	vertical-align: top;
+}
+
+.nl-swatch:hover {
+	border-color: #333333;
+	position: relative;
+	z-index: 1;
+}
+
+.nl-smilies {
+	max-height: 200px;
+	overflow-y: auto;
+	background: #ffffff;
+	border: 1px solid #dddddd;
+	border-radius: 3px;
+	padding: 6px;
+}
+
+.nl-smiley {
+	display: inline-block;
+	margin: 2px;
+	padding: 3px;
+	min-width: 0;
+	background: transparent;
+	border: 1px solid transparent;
+	border-radius: 3px;
+	cursor: pointer;
+	line-height: 0;
+}
+
+.nl-smiley:hover {
+	background: #eef4fa;
+	border-color: #b9d3e8;
+}
+
+.nl-smiley img {
+	max-width: 32px;
+	max-height: 32px;
+	vertical-align: middle;
+}
+
+.nl-size {
+	margin-right: 4px;
+}

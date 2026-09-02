@@ -1,0 +1,117 @@
+<!-- INCLUDE overall_header.html -->
+
+<link href="{{ U_NL_ACP_CSS }}" rel="stylesheet" type="text/css" media="screen" />
+
+<a id="maincontent"></a>
+
+<h1>{{ lang('ACP_NEWSLETTER_LISTS') }}</h1>
+
+<p>{{ lang('ACP_NEWSLETTER_LISTS_EXPLAIN') }}</p>
+
+<fieldset class="tabulated">
+	<legend>{{ lang('NL_LISTS') }}</legend>
+
+	<table class="table1">
+		<thead>
+		<tr>
+			<th>{{ lang('NL_LIST_NAME') }}</th>
+			<th style="width: 110px;">{{ lang('NL_LIST_SUBSCRIBERS') }}</th>
+			<th style="width: 100px;">{{ lang('NL_LIST_STATE') }}</th>
+			<th style="width: 90px;">{{ lang('NL_LIST_ORDER') }}</th>
+			<th style="width: 150px;">{{ lang('ACTION') }}</th>
+		</tr>
+		</thead>
+		<tbody>
+		{% for notiziario in notiziari %}
+			<tr>
+				<td>
+					<strong>{{ notiziario.NAME }}</strong>
+					{% if notiziario.S_DEFAULT %} <span class="nl-flag">{{ lang('NL_LIST_IS_DEFAULT') }}</span>{% endif %}
+					{% if notiziario.DESCRIPTION %}<br /><span class="small nl-hint">{{ notiziario.DESCRIPTION }}</span>{% endif %}
+				</td>
+				<td style="text-align: center;">
+					<a href="{{ U_SUBS }}&amp;lista={{ notiziario.LIST_ID }}">{{ notiziario.SUBSCRIBERS }}</a>
+				</td>
+				<td style="text-align: center;">
+					{% if notiziario.S_ENABLED %}
+						<strong class="nl-ok">{{ lang('NL_LIST_OPEN') }}</strong>
+					{% else %}
+						<span class="nl-hint">{{ lang('NL_LIST_CLOSED') }}</span>
+					{% endif %}
+					{% if notiziario.S_PUBLIC %}<br /><span class="small nl-hint">{{ lang('NL_LIST_IN_ARCHIVE') }}</span>{% endif %}
+				</td>
+				<td style="text-align: center;">
+					{% if not notiziario.S_FIRST %}<a href="{{ notiziario.U_UP }}" title="{{ lang('NL_LIST_UP') }}">&#9650;</a>{% endif %}
+					{% if not notiziario.S_LAST %}<a href="{{ notiziario.U_DOWN }}" title="{{ lang('NL_LIST_DOWN') }}">&#9660;</a>{% endif %}
+				</td>
+				<td style="text-align: center;">
+					<a href="{{ notiziario.U_EDIT }}">{{ lang('EDIT') }}</a>
+					{% if not notiziario.S_DEFAULT %} &middot; <a href="{{ notiziario.U_DELETE }}">{{ lang('DELETE') }}</a>{% endif %}
+				</td>
+			</tr>
+		{% else %}
+			<tr><td colspan="5" style="text-align: center;">{{ lang('NL_LISTS_NONE') }}</td></tr>
+		{% endfor %}
+		</tbody>
+	</table>
+</fieldset>
+
+<form id="newsletter_list" method="post" action="{{ U_ACTION }}">
+
+<fieldset>
+	<legend>{% if S_EDITING %}{{ lang('NL_LIST_EDIT') }}{% else %}{{ lang('NL_LIST_NEW') }}{% endif %}</legend>
+
+	<dl>
+		<dt><label for="nl_list_name">{{ lang('NL_LIST_NAME') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_LIST_NAME_EXPLAIN') }}</span></dt>
+		<dd><input type="text" id="nl_list_name" name="nl_list_name" value="{{ NL_LIST_NAME }}" maxlength="255" class="inputbox" /></dd>
+	</dl>
+
+	<dl>
+		<dt><label for="nl_list_desc">{{ lang('NL_LIST_DESC') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_LIST_DESC_EXPLAIN') }}</span></dt>
+		<dd><textarea id="nl_list_desc" name="nl_list_desc" rows="4" cols="76" class="inputbox">{{ NL_LIST_DESC }}</textarea></dd>
+	</dl>
+
+	<dl>
+		<dt><label for="nl_list_enabled">{{ lang('NL_LIST_ENABLED') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_LIST_ENABLED_EXPLAIN') }}</span></dt>
+		<dd>
+			{% if S_LIST_DEFAULT %}
+				<span class="nl-hint">{{ lang('NL_LIST_DEFAULT_ALWAYS_OPEN') }}</span>
+				<input type="hidden" name="nl_list_enabled" value="1" />
+			{% else %}
+				<label><input type="radio" id="nl_list_enabled" name="nl_list_enabled" value="1"{% if S_LIST_ENABLED %} checked="checked"{% endif %} class="radio" /> {{ lang('YES') }}</label>
+				<label><input type="radio" name="nl_list_enabled" value="0"{% if not S_LIST_ENABLED %} checked="checked"{% endif %} class="radio" /> {{ lang('NO') }}</label>
+			{% endif %}
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="nl_list_public">{{ lang('NL_LIST_PUBLIC') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_LIST_PUBLIC_EXPLAIN') }}</span></dt>
+		<dd>
+			<label><input type="radio" id="nl_list_public" name="nl_list_public" value="1"{% if S_LIST_PUBLIC %} checked="checked"{% endif %} class="radio" /> {{ lang('YES') }}</label>
+			<label><input type="radio" name="nl_list_public" value="0"{% if not S_LIST_PUBLIC %} checked="checked"{% endif %} class="radio" /> {{ lang('NO') }}</label>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="nl_list_groups">{{ lang('NL_LIST_GROUPS') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_LIST_GROUPS_EXPLAIN') }}</span></dt>
+		<dd>
+			<select id="nl_list_groups" name="nl_list_groups[]" multiple="multiple" size="8" class="nl-groups">
+				{% for gruppo in gruppi %}
+					<option value="{{ gruppo.GROUP_ID }}"{% if gruppo.S_SELECTED %} selected="selected"{% endif %}>{{ gruppo.GROUP_NAME }} ({{ gruppo.MEMBERS }})</option>
+				{% endfor %}
+			</select>
+		</dd>
+	</dl>
+</fieldset>
+
+<fieldset class="submit-buttons">
+	<legend>{{ lang('SUBMIT') }}</legend>
+	<input type="hidden" name="list_id" value="{{ NL_LIST_ID }}" />
+	<input class="button1" type="submit" name="submit_list" value="{% if S_EDITING %}{{ lang('SUBMIT') }}{% else %}{{ lang('NL_LIST_CREATE') }}{% endif %}" />
+	{% if S_EDITING %}<a class="button2" href="{{ U_NEW }}">{{ lang('NL_LIST_CANCEL_EDIT') }}</a>{% endif %}
+	{{ S_FORM_TOKEN }}
+</fieldset>
+
+</form>
+
+<!-- INCLUDE overall_footer.html -->

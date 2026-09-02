@@ -1,0 +1,42 @@
+# L'ordine di dichiarazione conta: le rotte con segmenti fissi vengono prima di
+# quelle con soli segnaposto, altrimenti /newsletter/lista/3 potrebbe essere
+# letto come il numero "lista"
+salvocortesiano_newsletter_unsubscribe_list:
+    path: /newsletter/unsubscribe/{user_id}/{list_id}/{token}
+    defaults: { _controller: salvocortesiano.newsletter.controller.unsubscribe:handle_list }
+    requirements:
+        user_id: \d+
+        list_id: \d+
+        token: '[a-f0-9]{32}'
+
+# Rotta storica: e dentro le email gia spedite e non va toccata. Significa
+# "togli da tutti i notiziari"
+salvocortesiano_newsletter_unsubscribe:
+    path: /newsletter/unsubscribe/{user_id}/{token}
+    defaults: { _controller: salvocortesiano.newsletter.controller.unsubscribe:handle }
+    requirements:
+        user_id: \d+
+        token: '[a-f0-9]{32}'
+
+salvocortesiano_newsletter_archive:
+    path: /newsletter
+    defaults: { _controller: salvocortesiano.newsletter.controller.archive:index }
+
+salvocortesiano_newsletter_list:
+    path: /newsletter/lista/{list_id}
+    defaults: { _controller: salvocortesiano.newsletter.controller.archive:lista }
+    requirements:
+        list_id: \d+
+
+salvocortesiano_newsletter_issue:
+    path: /newsletter/numero/{campaign_id}
+    defaults: { _controller: salvocortesiano.newsletter.controller.archive:view }
+    requirements:
+        campaign_id: \d+
+
+# Rotta storica del singolo numero, anch'essa gia dentro email spedite
+salvocortesiano_newsletter_view:
+    path: /newsletter/{campaign_id}
+    defaults: { _controller: salvocortesiano.newsletter.controller.archive:view }
+    requirements:
+        campaign_id: \d+

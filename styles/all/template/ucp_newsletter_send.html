@@ -1,0 +1,336 @@
+<!-- INCLUDECSS @salvocortesiano_newsletter/newsletter.css -->
+<!-- INCLUDE ucp_header.html -->
+
+<h2>{{ lang('UCP_NEWSLETTER_SEND') }}</h2>
+
+<div class="panel">
+	<div class="inner">
+
+		{% if S_NL_DENIED %}
+			<div class="nl-box nl-box-bad">{{ lang('NL_SEND_NOT_ALLOWED') }}</div>
+		{% elseif S_NL_NO_LISTS %}
+			<div class="nl-box nl-box-bad">{{ lang('NL_SEND_NO_LISTS') }}</div>
+		{% elseif S_NL_CAN_SEND %}
+
+			<p>{{ lang('NL_SEND_EXPLAIN') }}</p>
+
+			{% if S_NL_APPROVAL %}
+				<div class="nl-box">{{ lang('NL_SEND_APPROVAL_NOTE') }}</div>
+			{% endif %}
+
+			{% if NL_LIMIT %}
+				<p class="nl-list-meta">{{ lang('NL_SEND_QUOTA', NL_DONE, NL_LIMIT, NL_LEFT) }}</p>
+			{% endif %}
+
+			{% if S_NL_EXHAUSTED %}
+				<div class="nl-box nl-box-bad">{{ lang('NL_SEND_LIMIT_REACHED', NL_LIMIT) }}</div>
+			{% endif %}
+
+			{% if errori %}
+				<div class="nl-box nl-box-bad">
+					{% for errore in errori %}
+						<p>{{ errore.MESSAGE }}</p>
+					{% endfor %}
+				</div>
+			{% endif %}
+
+			{% if S_PREVIEW %}
+				<h3>{{ lang('NL_PREVIEW') }}</h3>
+				<div class="nl-plain">{{ NL_PREVIEW }}</div>
+			{% endif %}
+
+			<form id="ucp_newsletter_send" method="post" action="{{ U_ACTION }}">
+
+			<input type="hidden" name="i" value="{{ NL_MODULE_ID }}" />
+			<input type="hidden" name="mode" value="{{ NL_MODULE_MODE }}" />
+
+			<fieldset class="fields2">
+				<dl>
+					<dt><label for="nl_list">{{ lang('NL_LIST') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_SEND_LIST_EXPLAIN', NL_RECIPIENTS) }}</span></dt>
+					<dd>
+						<select id="nl_list" name="nl_list">
+							{% for notiziario in notiziari %}
+								<option value="{{ notiziario.VALUE }}"{% if notiziario.S_SELECTED %} selected="selected"{% endif %}>{{ notiziario.NAME }}</option>
+							{% endfor %}
+						</select>
+					</dd>
+				</dl>
+
+				<dl>
+					<dt><label for="nl_subject">{{ lang('NL_SUBJECT') }}{{ lang('COLON') }}</label></dt>
+					<dd><input type="text" id="nl_subject" name="nl_subject" value="{{ NL_SUBJECT }}" maxlength="255" class="inputbox" /></dd>
+				</dl>
+
+				<dl>
+					<dt><label>{{ lang('NL_FORMAT') }}{{ lang('COLON') }}</label></dt>
+					<dd>
+						<label><input type="radio" name="nl_format" value="1"{% if S_FORMAT_BBCODE %} checked="checked"{% endif %} class="radio" /> {{ lang('NL_FORMAT_BBCODE') }}</label>
+						<label><input type="radio" name="nl_format" value="0"{% if not S_FORMAT_BBCODE %} checked="checked"{% endif %} class="radio" /> {{ lang('NL_FORMAT_TEXT') }}</label>
+					</dd>
+				</dl>
+
+				<dl>
+					<dt><label for="nl_body">{{ lang('NL_BODY') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_BBCODE_HINT') }}</span></dt>
+					<dd>
+						<div id="nl_bbcode_bar" class="nl-bbbar"{% if not S_FORMAT_BBCODE %} style="display: none;"{% endif %}>
+							<button type="button" class="button2" data-nl-tag="b" title="{{ lang('NL_BB_BOLD') }}"><strong>B</strong></button>
+							<button type="button" class="button2" data-nl-tag="i" title="{{ lang('NL_BB_ITALIC') }}"><em>i</em></button>
+							<button type="button" class="button2" data-nl-tag="u" title="{{ lang('NL_BB_UNDERLINE') }}"><span style="text-decoration: underline;">u</span></button>
+							<button type="button" class="button2" data-nl-tag="quote" title="{{ lang('NL_BB_QUOTE') }}">&#8220;&#8221;</button>
+							<button type="button" class="button2" data-nl-tag="code" title="{{ lang('NL_BB_CODE') }}">&lt;/&gt;</button>
+							<button type="button" class="button2" data-nl-tag="list" data-nl-inner="[*]" title="{{ lang('NL_BB_LIST') }}">&#8801;</button>
+							<button type="button" class="button2" data-nl-tag="img" title="{{ lang('NL_BB_IMG') }}">&#9634;</button>
+							<button type="button" class="button2" data-nl-tag="url" data-nl-prompt="{{ lang('NL_BB_URL_PROMPT') }}" title="{{ lang('NL_BB_URL') }}">&#128279;</button>
+							<button type="button" class="button2" data-nl-panel="nl_panel_color" title="{{ lang('NL_BB_COLOR') }}">&#9679;</button>
+							<button type="button" class="button2" data-nl-panel="nl_panel_size" title="{{ lang('NL_BB_SIZE') }}">A</button>
+							{% if faccine %}
+								<button type="button" class="button2" data-nl-panel="nl_panel_smilies" title="{{ lang('NL_BB_SMILIES') }}">&#9786;</button>
+							{% endif %}
+						</div>
+
+						<div id="nl_panel_color" class="nl-panel" style="display: none;">
+							<p class="nl-panel-title">{{ lang('NL_BB_COLOR_TITLE') }}</p>
+							<div id="nl_palette" class="nl-palette"></div>
+							<p class="nl-panel-foot">
+								<label>{{ lang('NL_BB_COLOR_CUSTOM') }}{{ lang('COLON') }}
+									<input type="color" id="nl_color_custom" value="#0f5d9d" />
+								</label>
+								<button type="button" class="button2" id="nl_color_apply">{{ lang('NL_BB_APPLY') }}</button>
+							</p>
+						</div>
+
+						<div id="nl_panel_size" class="nl-panel" style="display: none;">
+							<p class="nl-panel-title">{{ lang('NL_BB_SIZE_TITLE') }}</p>
+							<p>
+								<button type="button" class="button2 nl-size" data-nl-size="50" style="font-size: 10px;">{{ lang('NL_BB_SIZE_TINY') }}</button>
+								<button type="button" class="button2 nl-size" data-nl-size="85" style="font-size: 12px;">{{ lang('NL_BB_SIZE_SMALL') }}</button>
+								<button type="button" class="button2 nl-size" data-nl-size="100" style="font-size: 13px;">{{ lang('NL_BB_SIZE_NORMAL') }}</button>
+								<button type="button" class="button2 nl-size" data-nl-size="150" style="font-size: 16px;">{{ lang('NL_BB_SIZE_LARGE') }}</button>
+								<button type="button" class="button2 nl-size" data-nl-size="200" style="font-size: 19px;">{{ lang('NL_BB_SIZE_HUGE') }}</button>
+							</p>
+						</div>
+
+						{% if faccine %}
+							<div id="nl_panel_smilies" class="nl-panel" style="display: none;">
+								<p class="nl-panel-title">{{ lang('NL_BB_SMILIES_TITLE') }}</p>
+								<div class="nl-smilies">
+									{% for faccina in faccine %}
+										<button type="button" class="nl-smiley" data-nl-code="{{ faccina.CODE }}" title="{{ faccina.EMOTION }} {{ faccina.CODE }}"><img src="{{ faccina.SRC }}" alt="{{ faccina.CODE }}" /></button>
+									{% endfor %}
+								</div>
+							</div>
+						{% endif %}
+
+						<textarea id="nl_body" name="nl_body" rows="14" cols="76" class="inputbox">{{ NL_BODY }}</textarea>
+					</dd>
+				</dl>
+
+				<dl>
+					<dt>&nbsp;</dt>
+					<dd>
+						<input type="submit" name="submit_preview" value="{{ lang('NL_BUTTON_PREVIEW') }}" class="button2" />
+						{% if not S_NL_EXHAUSTED %}
+							<input type="submit" name="submit_send" value="{% if S_NL_APPROVAL %}{{ lang('NL_SEND_ASK') }}{% else %}{{ lang('NL_SEND_NOW') }}{% endif %}" class="button1" />
+						{% endif %}
+					</dd>
+				</dl>
+			</fieldset>
+
+			{{ S_FORM_TOKEN }}
+			</form>
+
+		{% endif %}
+
+	</div>
+</div>
+
+<script>
+(function () {
+	'use strict';
+
+	var barra = document.getElementById('nl_bbcode_bar');
+	var corpo = document.getElementById('nl_body');
+
+	if (!barra || !corpo) {
+		return;
+	}
+
+	var pannelli = document.querySelectorAll('.nl-panel');
+
+	var chiudiPannelli = function (tranne) {
+		for (var p = 0; p < pannelli.length; p++) {
+			if (pannelli[p] !== tranne) {
+				pannelli[p].style.display = 'none';
+			}
+		}
+	};
+
+	// La barra riguarda il solo BBCode: in testo semplice i tag resterebbero
+	// scritti cosi come sono
+	var formato = document.querySelectorAll('input[name="nl_format"]');
+
+	var aggiornaFormato = function () {
+		var bbcode = false;
+
+		for (var k = 0; k < formato.length; k++) {
+			if (formato[k].checked && formato[k].value === '1') {
+				bbcode = true;
+			}
+		}
+
+		barra.style.display = bbcode ? '' : 'none';
+
+		if (!bbcode) {
+			chiudiPannelli(null);
+		}
+	};
+
+	for (var j = 0; j < formato.length; j++) {
+		formato[j].addEventListener('change', aggiornaFormato);
+	}
+
+	aggiornaFormato();
+
+	// Inserimento dei tag attorno al testo selezionato
+	var inserisci = function (tag, attributo, interno) {
+		var inizio = corpo.selectionStart;
+		var fine = corpo.selectionEnd;
+		var scelto = corpo.value.substring(inizio, fine);
+
+		var apre = '[' + tag + (attributo ? '=' + attributo : '') + ']';
+		var chiude = '[/' + tag + ']';
+		var dentro = scelto || (interno || '');
+
+		corpo.value = corpo.value.substring(0, inizio) + apre + dentro + chiude + corpo.value.substring(fine);
+
+		var posizione = inizio + apre.length + dentro.length;
+		corpo.focus();
+		corpo.setSelectionRange(posizione, posizione);
+	};
+
+	// Inserimento di testo semplice: serve alle faccine, che sono codici
+	var inserisciGrezzo = function (testo) {
+		var inizio = corpo.selectionStart;
+		var fine = corpo.selectionEnd;
+		var prima = corpo.value.substring(0, inizio);
+		var dopo = corpo.value.substring(fine);
+		var sinistra = (prima === '' || /\s$/.test(prima)) ? '' : ' ';
+		var destra = (dopo === '' || /^\s/.test(dopo)) ? '' : ' ';
+
+		corpo.value = prima + sinistra + testo + destra + dopo;
+
+		var posizione = inizio + sinistra.length + testo.length + destra.length;
+		corpo.focus();
+		corpo.setSelectionRange(posizione, posizione);
+	};
+
+	var pulsanti = barra.querySelectorAll('button[data-nl-tag]');
+
+	for (var b = 0; b < pulsanti.length; b++) {
+		pulsanti[b].addEventListener('click', function (evento) {
+			var pulsante = evento.currentTarget;
+			var domanda = pulsante.getAttribute('data-nl-prompt');
+			var attributo = '';
+
+			if (domanda) {
+				attributo = window.prompt(domanda, '');
+
+				if (attributo === null) {
+					return;
+				}
+			}
+
+			inserisci(pulsante.getAttribute('data-nl-tag'), attributo, pulsante.getAttribute('data-nl-inner'));
+		});
+	}
+
+	// Pannelli a scomparsa
+	var apribili = barra.querySelectorAll('button[data-nl-panel]');
+
+	for (var a = 0; a < apribili.length; a++) {
+		apribili[a].addEventListener('click', function (evento) {
+			var pannello = document.getElementById(evento.currentTarget.getAttribute('data-nl-panel'));
+
+			if (!pannello) {
+				return;
+			}
+
+			var aperto = (pannello.style.display !== 'none');
+			chiudiPannelli(pannello);
+			pannello.style.display = aperto ? 'none' : '';
+
+			if (!aperto && pannello.id === 'nl_panel_color') {
+				costruisciTavolozza();
+			}
+		});
+	}
+
+	// Tavolozza con lo stesso schema di phpBB: cinque livelli per canale
+	var tavolozzaFatta = false;
+
+	var costruisciTavolozza = function () {
+		var contenitore = document.getElementById('nl_palette');
+
+		if (!contenitore || tavolozzaFatta) {
+			return;
+		}
+
+		var livelli = ['00', '40', '80', 'BF', 'FF'];
+		var html = '';
+
+		for (var r = 0; r < 5; r++) {
+			html += '<div class="nl-palette-row">';
+
+			for (var g = 0; g < 5; g++) {
+				for (var bl = 0; bl < 5; bl++) {
+					var colore = '#' + livelli[r] + livelli[g] + livelli[bl];
+					html += '<button type="button" class="nl-swatch" data-nl-color="' + colore + '" title="' + colore + '" style="background:' + colore + ';"></button>';
+				}
+			}
+
+			html += '</div>';
+		}
+
+		contenitore.innerHTML = html;
+		tavolozzaFatta = true;
+
+		var campioni = contenitore.querySelectorAll('button[data-nl-color]');
+
+		for (var c = 0; c < campioni.length; c++) {
+			campioni[c].addEventListener('click', function (evento) {
+				inserisci('color', evento.currentTarget.getAttribute('data-nl-color'), '');
+				chiudiPannelli(null);
+			});
+		}
+	};
+
+	var scelto = document.getElementById('nl_color_custom');
+	var applica = document.getElementById('nl_color_apply');
+
+	if (scelto && applica) {
+		applica.addEventListener('click', function () {
+			inserisci('color', scelto.value, '');
+			chiudiPannelli(null);
+		});
+	}
+
+	var dimensioni = document.querySelectorAll('button[data-nl-size]');
+
+	for (var d = 0; d < dimensioni.length; d++) {
+		dimensioni[d].addEventListener('click', function (evento) {
+			inserisci('size', evento.currentTarget.getAttribute('data-nl-size'), '');
+			chiudiPannelli(null);
+		});
+	}
+
+	var faccine = document.querySelectorAll('button[data-nl-code]');
+
+	for (var f = 0; f < faccine.length; f++) {
+		faccine[f].addEventListener('click', function (evento) {
+			inserisciGrezzo(evento.currentTarget.getAttribute('data-nl-code'));
+		});
+	}
+})();
+</script>
+
+<!-- INCLUDE ucp_footer.html -->

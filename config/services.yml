@@ -1,0 +1,113 @@
+imports:
+    - { resource: tables.yml }
+
+services:
+    salvocortesiano.newsletter.access:
+        class: salvocortesiano\newsletter\core\access
+        arguments:
+            - '@config'
+            - '@dbal.conn'
+
+    salvocortesiano.newsletter.html:
+        class: salvocortesiano\newsletter\core\html
+
+    salvocortesiano.newsletter.banner:
+        class: salvocortesiano\newsletter\core\banner
+        arguments:
+            - '@config'
+            - '@files.factory'
+            - '@language'
+            - '%core.root_path%'
+
+    salvocortesiano.newsletter.bbcode:
+        class: salvocortesiano\newsletter\core\bbcode
+        arguments:
+            - '@config'
+            - '@text_formatter.parser'
+            - '@text_formatter.renderer'
+            - '@text_formatter.utils'
+            - '@language'
+
+    salvocortesiano.newsletter.mailer:
+        class: salvocortesiano\newsletter\core\mailer
+        arguments:
+            - '@config'
+            - '@config_text'
+            - '@language'
+            - '@controller.helper'
+            - '@salvocortesiano.newsletter.html'
+            - '%core.root_path%'
+            - '%core.php_ext%'
+
+    salvocortesiano.newsletter.manager:
+        class: salvocortesiano\newsletter\core\manager
+        arguments:
+            - '@dbal.conn'
+            - '@config'
+            - '@language'
+            - '@user'
+            - '@log'
+            - '@salvocortesiano.newsletter.mailer'
+            - '@salvocortesiano.newsletter.html'
+            - '@salvocortesiano.newsletter.banner'
+            - '@salvocortesiano.newsletter.bbcode'
+            - '%salvocortesiano.newsletter.tables.campaigns%'
+            - '%salvocortesiano.newsletter.tables.queue%'
+            - '%salvocortesiano.newsletter.tables.subs%'
+            - '%salvocortesiano.newsletter.tables.lists%'
+            - '%salvocortesiano.newsletter.tables.list_subs%'
+            - '%core.root_path%'
+            - '%core.php_ext%'
+
+    salvocortesiano.newsletter.diagnostics:
+        class: salvocortesiano\newsletter\core\diagnostics
+        arguments:
+            - '@config'
+            - '@language'
+            - '@salvocortesiano.newsletter.manager'
+
+    salvocortesiano.newsletter.controller.archive:
+        class: salvocortesiano\newsletter\controller\archive
+        arguments:
+            - '@config'
+            - '@auth'
+            - '@language'
+            - '@template'
+            - '@request'
+            - '@user'
+            - '@controller.helper'
+            - '@pagination'
+            - '@salvocortesiano.newsletter.manager'
+            - '@salvocortesiano.newsletter.html'
+            - '@salvocortesiano.newsletter.access'
+
+    salvocortesiano.newsletter.controller.unsubscribe:
+        class: salvocortesiano\newsletter\controller\unsubscribe
+        arguments:
+            - '@config'
+            - '@language'
+            - '@template'
+            - '@user'
+            - '@controller.helper'
+            - '@salvocortesiano.newsletter.manager'
+
+    salvocortesiano.newsletter.listener:
+        class: salvocortesiano\newsletter\event\listener
+        arguments:
+            - '@config'
+            - '@user'
+            - '@auth'
+            - '@language'
+            - '@template'
+            - '@controller.helper'
+            - '@salvocortesiano.newsletter.access'
+        tags:
+            - { name: event.listener }
+
+    salvocortesiano.newsletter.cron.send:
+        class: salvocortesiano\newsletter\cron\send
+        arguments:
+            - '@config'
+            - '@salvocortesiano.newsletter.manager'
+        tags:
+            - { name: cron.task }

@@ -1,0 +1,38 @@
+<!-- INCLUDE overall_header.html -->
+
+<link href="{{ U_NL_ACP_CSS }}" rel="stylesheet" type="text/css" media="screen" />
+
+<div class="errorbox">
+	<h3>{{ MESSAGE_TITLE }}</h3>
+	<p>{{ MESSAGE_TEXT }}</p>
+</div>
+
+<form id="confirm" action="{{ S_CONFIRM_ACTION }}" method="post">
+
+<fieldset>
+	<legend>{{ lang('NL_NOTIFY_LEGEND') }}</legend>
+
+	{% if S_NL_HAS_EMAIL %}
+		<dl>
+			<dt><label for="nl_notify">{{ lang('NL_NOTIFY_USER') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_NOTIFY_USER_EXPLAIN') }}</span></dt>
+			<dd>
+				<label><input type="checkbox" id="nl_notify" name="nl_notify" value="1"{% if S_NL_NOTIFY_DEFAULT %} checked="checked"{% endif %} class="radio" /> {{ lang('NL_NOTIFY_SEND_TO', NL_NOTIFY_EMAIL) }}</label>
+			</dd>
+		</dl>
+	{% else %}
+		<dl>
+			<dt><label>{{ lang('NL_NOTIFY_USER') }}{{ lang('COLON') }}</label></dt>
+			<dd><span class="nl-hint">{{ lang('NL_NOTIFY_NO_EMAIL') }}</span></dd>
+		</dl>
+	{% endif %}
+</fieldset>
+
+<fieldset class="submit-buttons">
+	{{ S_HIDDEN_FIELDS }}
+	<input type="submit" name="confirm" value="{{ lang('YES') }}" class="button1" />&nbsp;
+	<input type="submit" name="cancel" value="{{ lang('NO') }}" class="button2" />
+</fieldset>
+
+</form>
+
+<!-- INCLUDE overall_footer.html -->

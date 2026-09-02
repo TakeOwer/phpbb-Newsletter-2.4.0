@@ -1,0 +1,568 @@
+<!-- INCLUDE overall_header.html -->
+
+<link href="{{ U_NL_ACP_CSS }}" rel="stylesheet" type="text/css" media="screen" />
+
+<a id="maincontent"></a>
+
+<h1>{{ lang('ACP_NEWSLETTER_SETTINGS') }}</h1>
+
+<div class="nl-identity">
+	<p class="nl-shields">
+		{% if NL_VERSION %}
+			<span class="nl-shield"><span class="nl-shield-label">{{ lang('NL_SHIELD_VERSION') }}</span><span class="nl-shield-value nl-shield-blue">{{ NL_VERSION }}</span></span>
+		{% endif %}
+		<span class="nl-shield" title="{% if NL_PHPBB_REQUIRED %}{{ lang('NL_SHIELD_REQUIRES', NL_PHPBB_REQUIRED) }}{% endif %}">
+			<span class="nl-shield-label">phpBB</span><span class="nl-shield-value {% if S_NL_PHPBB_OK %}nl-shield-green{% else %}nl-shield-red{% endif %}">{{ NL_PHPBB_VERSION }}</span>
+		</span>
+		<span class="nl-shield" title="{% if NL_PHP_REQUIRED %}{{ lang('NL_SHIELD_REQUIRES', NL_PHP_REQUIRED) }}{% endif %}">
+			<span class="nl-shield-label">PHP</span><span class="nl-shield-value {% if S_NL_PHP_OK %}nl-shield-green{% else %}nl-shield-red{% endif %}">{{ NL_PHP_VERSION }}</span>
+		</span>
+		<span class="nl-shield"><span class="nl-shield-label">{{ lang('NL_SHIELD_LICENSE') }}</span><span class="nl-shield-value nl-shield-grey">GPL-2.0</span></span>
+	</p>
+</div>
+
+<p>{{ lang('ACP_NEWSLETTER_SETTINGS_EXPLAIN') }}</p>
+
+{% if not S_EMAIL_ENABLED %}
+	<div class="errorbox">
+		<h3>{{ lang('WARNING') }}</h3>
+		<p>{{ lang('NL_EMAIL_DISABLED', '<a href="' ~ U_BOARD_EMAIL_SETTINGS ~ '">', '</a>') }}</p>
+	</div>
+{% endif %}
+
+<form id="newsletter_settings" method="post" action="{{ U_ACTION }}">
+
+<fieldset>
+	<legend>{{ lang('NL_GENERAL') }}</legend>
+
+	<dl>
+		<dt><label for="newsletter_enabled">{{ lang('NL_ENABLED') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_ENABLED_EXPLAIN') }}</span></dt>
+		<dd>
+			<label><input type="radio" id="newsletter_enabled" name="newsletter_enabled" value="1"{% if NEWSLETTER_ENABLED %} checked="checked"{% endif %} class="radio" /> {{ lang('YES') }}</label>
+			<label><input type="radio" name="newsletter_enabled" value="0"{% if not NEWSLETTER_ENABLED %} checked="checked"{% endif %} class="radio" /> {{ lang('NO') }}</label>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label>{{ lang('NL_DELIVERY_MODE') }}{{ lang('COLON') }}</label></dt>
+		<dd>{% if S_SMTP %}SMTP{% else %}{{ lang('NL_DELIVERY_PHP') }}{% endif %} &middot; <a href="{{ U_BOARD_EMAIL_SETTINGS }}">{{ lang('NL_BOARD_EMAIL_SETTINGS') }}</a></dd>
+	</dl>
+
+	<dl>
+		<dt><label>{{ lang('NL_LAST_RUN') }}{{ lang('COLON') }}</label></dt>
+		<dd>{{ NEWSLETTER_LAST_RUN }}</dd>
+	</dl>
+</fieldset>
+
+<fieldset>
+	<legend>{{ lang('NL_DIAGNOSTICS') }}</legend>
+
+	<p>{{ lang('NL_DIAG_EXPLAIN') }}</p>
+
+	{% if S_NL_DIAG_STATE == 'ok' %}
+		<div class="nl-note nl-note-ok">
+			<span class="nl-note-icon">&#10003;</span>
+			<div class="nl-note-body">{{ lang('NL_DIAG_STATE_OK', NL_DIAG_LAST_TIME) }}</div>
+		</div>
+	{% elseif S_NL_DIAG_STATE == 'fail' %}
+		<div class="nl-note nl-note-bad">
+			<span class="nl-note-icon">&#10007;</span>
+			<div class="nl-note-body">{{ lang('NL_DIAG_STATE_FAIL', NL_DIAG_LAST_TIME) }}</div>
+		</div>
+	{% else %}
+		<div class="nl-note nl-note-info">
+			<span class="nl-note-icon">&#8505;</span>
+			<div class="nl-note-body">{{ lang('NL_DIAG_STATE_UNKNOWN') }}</div>
+		</div>
+	{% endif %}
+
+	{% if S_NL_TLS_WARNING %}
+		<div class="nl-note nl-note-bad">
+			<span class="nl-note-icon">&#10007;</span>
+			<div class="nl-note-body">{{ lang('NL_DIAG_TLS_WARNING', NL_DIAG_PORT_LABEL, NL_DIAG_SUGGESTED, NL_DIAG_CURRENT, '<a href="' ~ U_BOARD_EMAIL_SETTINGS ~ '">', '</a>') }}</div>
+		</div>
+	{% elseif S_NL_TLS_INFO %}
+		<div class="nl-note nl-note-warn">
+			<span class="nl-note-icon">!</span>
+			<div class="nl-note-body">{{ lang('NL_DIAG_TLS_INFO', NL_DIAG_PORT_LABEL, NL_DIAG_SUGGESTED, '<a href="' ~ U_BOARD_EMAIL_SETTINGS ~ '">', '</a>') }}</div>
+		</div>
+	{% endif %}
+
+	<dl>
+		<dt><label>{{ lang('NL_DIAG_EMAIL') }}{{ lang('COLON') }}</label></dt>
+		<dd>{% if S_NL_EMAIL_ON %}<strong class="nl-ok">{{ lang('NL_DIAG_ON') }}</strong>{% else %}<strong class="nl-warn">{{ lang('NL_DIAG_OFF') }}</strong>{% endif %}</dd>
+	</dl>
+	<dl>
+		<dt><label>{{ lang('NL_DIAG_METHOD') }}{{ lang('COLON') }}</label></dt>
+		<dd>{% if S_NL_SMTP %}SMTP{% else %}{{ lang('NL_DELIVERY_PHP') }}{% endif %}</dd>
+	</dl>
+	{% if S_NL_SMTP %}
+		<dl>
+			<dt><label>{{ lang('NL_DIAG_SERVER') }}{{ lang('COLON') }}</label></dt>
+			<dd><span class="nl-email">{{ NL_DIAG_HOST }}</span></dd>
+		</dl>
+		<dl>
+			<dt><label>{{ lang('NL_DIAG_PORT') }}{{ lang('COLON') }}</label></dt>
+			<dd>{{ NL_DIAG_PORT_VALUE }}</dd>
+		</dl>
+		<dl>
+			<dt><label>{{ lang('NL_DIAG_AUTH') }}{{ lang('COLON') }}</label></dt>
+			<dd><span class="nl-email">{{ NL_DIAG_AUTH_VALUE }}</span></dd>
+		</dl>
+	{% endif %}
+	<dl>
+		<dt><label>{{ lang('NL_DIAG_BOARD_EMAIL') }}{{ lang('COLON') }}</label></dt>
+		<dd><span class="nl-email">{{ NL_DIAG_BOARD_ADDR }}</span> &middot; <a href="{{ U_BOARD_EMAIL_SETTINGS }}">{{ lang('NL_BOARD_EMAIL_SETTINGS') }}</a></dd>
+	</dl>
+
+	<p class="nl-hint">{{ lang('NL_DIAG_CHECK') }}</p>
+
+	<dl>
+		<dt><label for="nl_diag_email">{{ lang('NL_DIAG_SEND_TEST') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_DIAG_SEND_TEST_EXPLAIN') }}</span></dt>
+		<dd>
+			<input type="email" id="nl_diag_email" name="nl_diag_email" value="{{ NL_DIAG_EMAIL_VALUE }}" maxlength="100" class="inputbox" />
+			<input class="button2" type="submit" name="submit_diag" value="{{ lang('NL_DIAG_RUN') }}" />
+		</dd>
+	</dl>
+
+	{% if S_NL_DIAG_RUN %}
+		<div class="nl-diag {% if S_NL_DIAG_OK %}nl-diag-ok{% else %}nl-diag-bad{% endif %}">
+			<h3>{% if S_NL_DIAG_OK %}{{ lang('NL_DIAG_RESULT_OK', NL_DIAG_TARGET) }}{% else %}{{ lang('NL_DIAG_RESULT_BAD') }}{% endif %}</h3>
+
+			<table class="table1 nl-diag-table">
+				<tbody>
+				{% for passo in diagnostica %}
+					<tr class="nl-diag-{{ passo.STATUS }}">
+						<td class="nl-diag-mark">
+							{% if passo.STATUS == 'ok' %}&#10003;
+							{% elseif passo.STATUS == 'fail' %}&#10007;
+							{% elseif passo.STATUS == 'warn' %}!
+							{% else %}&ndash;{% endif %}
+						</td>
+						<td class="nl-diag-label">{{ passo.LABEL }}</td>
+						<td class="nl-diag-detail">{{ passo.DETAIL }}</td>
+					</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+
+			<p class="nl-hint">{{ lang('NL_DIAG_RESULT_NOTE') }}</p>
+		</div>
+	{% endif %}
+</fieldset>
+
+<fieldset>
+	<legend>{{ lang('NL_DELIVERY') }}</legend>
+
+	<dl>
+		<dt><label for="newsletter_batch_size_preset">{{ lang('NL_BATCH') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_BATCH_EXPLAIN') }}</span></dt>
+		<dd>
+			<select id="newsletter_batch_size_preset" name="newsletter_batch_size_preset" data-nl-toggle="newsletter_batch_custom">
+				{% for voce in lotti %}
+					<option value="{{ voce.VALUE }}"{% if voce.S_SELECTED %} selected="selected"{% endif %}>{{ voce.NAME }}</option>
+				{% endfor %}
+			</select>
+			<span id="newsletter_batch_custom" class="nl-custom"{% if not S_BATCH_CUSTOM %} style="display: none;"{% endif %}>
+				<label for="newsletter_batch_size">{{ lang('NL_CUSTOM_VALUE') }}{{ lang('COLON') }}</label>
+				<input type="number" id="newsletter_batch_size" name="newsletter_batch_size" value="{{ NEWSLETTER_BATCH_SIZE }}" min="10" max="100" class="post" /> {{ lang('NL_EMAILS') }}
+			</span>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_interval_preset">{{ lang('NL_INTERVAL') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_INTERVAL_EXPLAIN') }}</span></dt>
+		<dd>
+			<select id="newsletter_interval_preset" name="newsletter_interval_preset" data-nl-toggle="newsletter_interval_custom">
+				{% for voce in intervalli %}
+					<option value="{{ voce.VALUE }}"{% if voce.S_SELECTED %} selected="selected"{% endif %}>{{ voce.NAME }}</option>
+				{% endfor %}
+			</select>
+			<span id="newsletter_interval_custom" class="nl-custom"{% if not S_INTERVAL_CUSTOM %} style="display: none;"{% endif %}>
+				<label for="newsletter_interval">{{ lang('NL_CUSTOM_VALUE') }}{{ lang('COLON') }}</label>
+				<input type="time" id="newsletter_interval" name="newsletter_interval" value="{{ NEWSLETTER_INTERVAL }}" step="1" class="post" />
+				<span class="nl-hint">{{ lang('NL_INTERVAL_HINT') }}</span>
+			</span>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_warn_threshold">{{ lang('NL_WARN_THRESHOLD') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_WARN_THRESHOLD_EXPLAIN') }}</span></dt>
+		<dd><input type="number" id="newsletter_warn_threshold" name="newsletter_warn_threshold" value="{{ NEWSLETTER_WARN_THRESHOLD }}" min="1" max="100000" class="post" /></dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_max_attempts">{{ lang('NL_MAX_ATTEMPTS') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_MAX_ATTEMPTS_EXPLAIN') }}</span></dt>
+		<dd><input type="number" id="newsletter_max_attempts" name="newsletter_max_attempts" value="{{ NEWSLETTER_MAX_ATTEMPTS }}" min="1" max="5" class="post" /></dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_time_budget">{{ lang('NL_TIME_BUDGET') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_TIME_BUDGET_EXPLAIN') }}</span></dt>
+		<dd><input type="number" id="newsletter_time_budget" name="newsletter_time_budget" value="{{ NEWSLETTER_TIME_BUDGET }}" min="5" max="300" class="post" /> {{ lang('NL_SECONDS') }}</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_copy_sender">{{ lang('NL_COPY_SENDER') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_COPY_SENDER_EXPLAIN') }}</span></dt>
+		<dd>
+			<label><input type="radio" id="newsletter_copy_sender" name="newsletter_copy_sender" value="1"{% if NEWSLETTER_COPY_SENDER %} checked="checked"{% endif %} class="radio" /> {{ lang('YES') }}</label>
+			<label><input type="radio" name="newsletter_copy_sender" value="0"{% if not NEWSLETTER_COPY_SENDER %} checked="checked"{% endif %} class="radio" /> {{ lang('NO') }}</label>
+		</dd>
+	</dl>
+</fieldset>
+
+<fieldset>
+	<legend>{{ lang('NL_RECIPIENTS') }}</legend>
+
+	<dl>
+		<dt><label for="newsletter_respect_optout">{{ lang('NL_RESPECT_OPTOUT') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_RESPECT_OPTOUT_EXPLAIN') }}</span></dt>
+		<dd>
+			<label><input type="radio" id="newsletter_respect_optout" name="newsletter_respect_optout" value="1"{% if NEWSLETTER_RESPECT_OPTOUT %} checked="checked"{% endif %} class="radio" /> {{ lang('YES') }}</label>
+			<label><input type="radio" name="newsletter_respect_optout" value="0"{% if not NEWSLETTER_RESPECT_OPTOUT %} checked="checked"{% endif %} class="radio" /> {{ lang('NO') }}</label>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_skip_banned">{{ lang('NL_SKIP_BANNED') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_SKIP_BANNED_EXPLAIN') }}</span></dt>
+		<dd>
+			<label><input type="radio" id="newsletter_skip_banned" name="newsletter_skip_banned" value="1"{% if NEWSLETTER_SKIP_BANNED %} checked="checked"{% endif %} class="radio" /> {{ lang('YES') }}</label>
+			<label><input type="radio" name="newsletter_skip_banned" value="0"{% if not NEWSLETTER_SKIP_BANNED %} checked="checked"{% endif %} class="radio" /> {{ lang('NO') }}</label>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_check_dns">{{ lang('NL_CHECK_DNS') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_CHECK_DNS_EXPLAIN') }}</span></dt>
+		<dd>
+			<label><input type="radio" id="newsletter_check_dns" name="newsletter_check_dns" value="1"{% if NEWSLETTER_CHECK_DNS %} checked="checked"{% endif %} class="radio" /> {{ lang('YES') }}</label>
+			<label><input type="radio" name="newsletter_check_dns" value="0"{% if not NEWSLETTER_CHECK_DNS %} checked="checked"{% endif %} class="radio" /> {{ lang('NO') }}</label>
+		</dd>
+	</dl>
+</fieldset>
+
+<fieldset>
+	<legend>{{ lang('NL_ARCHIVE') }}</legend>
+
+	<p>{{ lang('NL_ARCHIVE_SETTINGS_EXPLAIN') }}</p>
+
+	<dl>
+		<dt><label for="newsletter_archive_visibility">{{ lang('NL_ARCHIVE_VISIBILITY') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_ARCHIVE_VISIBILITY_EXPLAIN') }}</span></dt>
+		<dd>
+			<select id="newsletter_archive_visibility" name="newsletter_archive_visibility">
+				<option value="0"{% if NEWSLETTER_ARCHIVE_VIS == 0 %} selected="selected"{% endif %}>{{ lang('NL_ARCHIVE_VIS_CLOSED') }}</option>
+				<option value="1"{% if NEWSLETTER_ARCHIVE_VIS == 1 %} selected="selected"{% endif %}>{{ lang('NL_ARCHIVE_VIS_REGISTERED') }}</option>
+				<option value="2"{% if NEWSLETTER_ARCHIVE_VIS == 2 %} selected="selected"{% endif %}>{{ lang('NL_ARCHIVE_VIS_EVERYONE') }}</option>
+				<option value="3"{% if NEWSLETTER_ARCHIVE_VIS == 3 %} selected="selected"{% endif %}>{{ lang('NL_ARCHIVE_VIS_GROUPS') }}</option>
+			</select>
+			<br /><span class="nl-hint">{{ lang('NL_ARCHIVE_COUNT', NEWSLETTER_ARCHIVE_COUNT) }}</span>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_archive_groups">{{ lang('NL_ARCHIVE_GROUPS') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_ARCHIVE_GROUPS_EXPLAIN') }}</span></dt>
+		<dd>
+			<select id="newsletter_archive_groups" name="newsletter_archive_groups[]" multiple="multiple" size="10" class="nl-groups">
+				{% for gruppo in gruppi_archivio %}
+					<option value="{{ gruppo.GROUP_ID }}"{% if gruppo.S_SELECTED %} selected="selected"{% endif %}>{{ gruppo.GROUP_NAME }}</option>
+				{% endfor %}
+			</select>
+			{% if not S_ARCHIVE_GROUPS %}
+				<br /><span class="nl-hint">{{ lang('NL_ARCHIVE_GROUPS_INACTIVE') }}</span>
+			{% endif %}
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_archive_link_top">{{ lang('NL_ARCHIVE_LINK_TOP') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_ARCHIVE_LINK_TOP_EXPLAIN') }}</span></dt>
+		<dd>
+			<label><input type="radio" id="newsletter_archive_link_top" name="newsletter_archive_link_top" value="1"{% if NEWSLETTER_ARCHIVE_LINK_TOP %} checked="checked"{% endif %} class="radio" /> {{ lang('YES') }}</label>
+			<label><input type="radio" name="newsletter_archive_link_top" value="0"{% if not NEWSLETTER_ARCHIVE_LINK_TOP %} checked="checked"{% endif %} class="radio" /> {{ lang('NO') }}</label>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_archive_navbar">{{ lang('NL_ARCHIVE_NAVBAR') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_ARCHIVE_NAVBAR_EXPLAIN') }}</span></dt>
+		<dd>
+			<label><input type="radio" id="newsletter_archive_navbar" name="newsletter_archive_navbar" value="1"{% if NEWSLETTER_ARCHIVE_NAVBAR %} checked="checked"{% endif %} class="radio" /> {{ lang('YES') }}</label>
+			<label><input type="radio" name="newsletter_archive_navbar" value="0"{% if not NEWSLETTER_ARCHIVE_NAVBAR %} checked="checked"{% endif %} class="radio" /> {{ lang('NO') }}</label>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_archive_per_page">{{ lang('NL_ARCHIVE_PER_PAGE') }}{{ lang('COLON') }}</label></dt>
+		<dd><input type="number" id="newsletter_archive_per_page" name="newsletter_archive_per_page" value="{{ NEWSLETTER_ARCHIVE_PER_PAGE }}" min="5" max="100" class="post" /></dd>
+	</dl>
+</fieldset>
+
+{% if S_SEND_AVAILABLE %}
+<fieldset>
+	<legend>{{ lang('NL_SEND') }}</legend>
+
+	<p>{{ lang('NL_SEND_SETTINGS_EXPLAIN') }}</p>
+
+	<div class="nl-note nl-note-warn">
+		<span class="nl-note-icon">!</span>
+		<div class="nl-note-body">{{ lang('NL_SEND_WARNING') }}</div>
+	</div>
+
+	<input type="hidden" name="newsletter_send_groups_present" value="1" />
+
+	<dl>
+		<dt><label for="newsletter_send_groups">{{ lang('NL_SEND_GROUPS') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_SEND_GROUPS_EXPLAIN') }}</span></dt>
+		<dd>
+			<select id="newsletter_send_groups" name="newsletter_send_groups[]" multiple="multiple" size="10" class="nl-groups">
+				{% for gruppo in gruppi_invio %}
+					<option value="{{ gruppo.GROUP_ID }}"{% if gruppo.S_SELECTED %} selected="selected"{% endif %}>{{ gruppo.GROUP_NAME }} ({{ gruppo.MEMBERS }})</option>
+				{% endfor %}
+			</select>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_send_lists">{{ lang('NL_SEND_LISTS') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_SEND_LISTS_EXPLAIN') }}</span></dt>
+		<dd>
+			<select id="newsletter_send_lists" name="newsletter_send_lists[]" multiple="multiple" size="8" class="nl-groups">
+				{% for notiziario in notiziari_invio %}
+					<option value="{{ notiziario.VALUE }}"{% if notiziario.S_SELECTED %} selected="selected"{% endif %}>{{ notiziario.NAME }}</option>
+				{% endfor %}
+			</select>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_send_approval">{{ lang('NL_SEND_APPROVAL') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_SEND_APPROVAL_EXPLAIN') }}</span></dt>
+		<dd>
+			<label><input type="radio" id="newsletter_send_approval" name="newsletter_send_approval" value="1"{% if NEWSLETTER_SEND_APPROVAL %} checked="checked"{% endif %} class="radio" /> {{ lang('YES') }}</label>
+			<label><input type="radio" name="newsletter_send_approval" value="0"{% if not NEWSLETTER_SEND_APPROVAL %} checked="checked"{% endif %} class="radio" /> {{ lang('NO') }}</label>
+			{% if NEWSLETTER_SEND_COUNT %}
+				<br /><span class="nl-hint">{{ lang('NL_SEND_PENDING_NOW', NEWSLETTER_SEND_COUNT) }}</span>
+			{% endif %}
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_send_limit">{{ lang('NL_SEND_LIMIT') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_SEND_LIMIT_EXPLAIN') }}</span></dt>
+		<dd><input type="number" id="newsletter_send_limit" name="newsletter_send_limit" value="{{ NEWSLETTER_SEND_LIMIT }}" min="0" max="50" class="post" /> {{ lang('NL_SEND_LIMIT_UNIT') }}</dd>
+	</dl>
+</fieldset>
+{% endif %}
+
+{% if S_FAILSAFE_AVAILABLE %}
+<fieldset>
+	<legend>{{ lang('NL_FAILSAFE') }}</legend>
+
+	<p>{{ lang('NL_FAILSAFE_EXPLAIN') }}</p>
+
+	<dl>
+		<dt><label for="newsletter_fail_streak">{{ lang('NL_FAIL_STREAK') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_FAIL_STREAK_EXPLAIN') }}</span></dt>
+		<dd><input type="number" id="newsletter_fail_streak" name="newsletter_fail_streak" value="{{ NEWSLETTER_FAIL_STREAK }}" min="0" max="200" class="post" /> {{ lang('NL_FAIL_STREAK_UNIT') }}</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_report_email">{{ lang('NL_REPORT_EMAIL') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_REPORT_EMAIL_EXPLAIN') }}</span></dt>
+		<dd>
+			<label><input type="radio" id="newsletter_report_email" name="newsletter_report_email" value="1"{% if NEWSLETTER_REPORT_EMAIL %} checked="checked"{% endif %} class="radio" /> {{ lang('YES') }}</label>
+			<label><input type="radio" name="newsletter_report_email" value="0"{% if not NEWSLETTER_REPORT_EMAIL %} checked="checked"{% endif %} class="radio" /> {{ lang('NO') }}</label>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_stall_grace">{{ lang('NL_STALL_GRACE') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_STALL_GRACE_EXPLAIN') }}</span></dt>
+		<dd><input type="number" id="newsletter_stall_grace" name="newsletter_stall_grace" value="{{ NEWSLETTER_STALL_GRACE }}" min="5" max="1440" class="post" /> {{ lang('NL_STALL_GRACE_UNIT') }}</dd>
+	</dl>
+</fieldset>
+{% endif %}
+
+<fieldset>
+	<legend>{{ lang('NL_SUBSCRIPTIONS') }}</legend>
+
+	<dl>
+		<dt><label for="newsletter_subs_enabled">{{ lang('NL_SUBS_ENABLED') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_SUBS_ENABLED_EXPLAIN') }}</span></dt>
+		<dd>
+			<label><input type="radio" id="newsletter_subs_enabled" name="newsletter_subs_enabled" value="1"{% if NEWSLETTER_SUBS_ENABLED %} checked="checked"{% endif %} class="radio" /> {{ lang('YES') }}</label>
+			<label><input type="radio" name="newsletter_subs_enabled" value="0"{% if not NEWSLETTER_SUBS_ENABLED %} checked="checked"{% endif %} class="radio" /> {{ lang('NO') }}</label>
+			<br /><span class="nl-hint">{{ lang('NL_SUBSCRIBERS_COUNT', NEWSLETTER_SUBSCRIBERS) }}</span>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_welcome_email">{{ lang('NL_WELCOME_EMAIL') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_WELCOME_EMAIL_EXPLAIN') }}</span></dt>
+		<dd>
+			<label><input type="radio" id="newsletter_welcome_email" name="newsletter_welcome_email" value="1"{% if NEWSLETTER_WELCOME_EMAIL %} checked="checked"{% endif %} class="radio" /> {{ lang('YES') }}</label>
+			<label><input type="radio" name="newsletter_welcome_email" value="0"{% if not NEWSLETTER_WELCOME_EMAIL %} checked="checked"{% endif %} class="radio" /> {{ lang('NO') }}</label>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_goodbye_email">{{ lang('NL_GOODBYE_EMAIL') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_GOODBYE_EMAIL_EXPLAIN') }}</span></dt>
+		<dd>
+			<label><input type="radio" id="newsletter_goodbye_email" name="newsletter_goodbye_email" value="1"{% if NEWSLETTER_GOODBYE_EMAIL %} checked="checked"{% endif %} class="radio" /> {{ lang('YES') }}</label>
+			<label><input type="radio" name="newsletter_goodbye_email" value="0"{% if not NEWSLETTER_GOODBYE_EMAIL %} checked="checked"{% endif %} class="radio" /> {{ lang('NO') }}</label>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_removed_email">{{ lang('NL_REMOVED_EMAIL') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_REMOVED_EMAIL_EXPLAIN') }}</span></dt>
+		<dd>
+			<label><input type="radio" id="newsletter_removed_email" name="newsletter_removed_email" value="1"{% if NEWSLETTER_REMOVED_EMAIL %} checked="checked"{% endif %} class="radio" /> {{ lang('YES') }}</label>
+			<label><input type="radio" name="newsletter_removed_email" value="0"{% if not NEWSLETTER_REMOVED_EMAIL %} checked="checked"{% endif %} class="radio" /> {{ lang('NO') }}</label>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_intro">{{ lang('NL_INTRO') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_INTRO_EXPLAIN') }} <strong>{{ lang('NL_LEAVE_EMPTY_DEFAULT') }}</strong></span></dt>
+		<dd><textarea id="newsletter_intro" name="newsletter_intro" rows="4" cols="76" class="inputbox">{{ NEWSLETTER_INTRO }}</textarea>
+			<details class="nl-default"><summary>{{ lang('NL_SHOW_DEFAULT') }}</summary><pre>{{ NL_PREDEF_INTRO }}</pre></details>
+		</dd>
+	</dl>
+</fieldset>
+
+<fieldset>
+	<legend>{{ lang('NL_SENDER') }}</legend>
+
+	<dl>
+		<dt><label for="newsletter_from_name">{{ lang('NL_FROM_NAME') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_FROM_NAME_EXPLAIN') }}</span></dt>
+		<dd><input type="text" id="newsletter_from_name" name="newsletter_from_name" value="{{ NEWSLETTER_FROM_NAME }}" maxlength="255" class="inputbox" /></dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_from_email">{{ lang('NL_FROM_EMAIL') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_FROM_EMAIL_EXPLAIN') }}</span></dt>
+		<dd><input type="email" id="newsletter_from_email" name="newsletter_from_email" value="{{ NEWSLETTER_FROM_EMAIL }}" maxlength="100" class="inputbox" /></dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_reply_to">{{ lang('NL_REPLY_TO') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_REPLY_TO_EXPLAIN') }}</span></dt>
+		<dd><input type="email" id="newsletter_reply_to" name="newsletter_reply_to" value="{{ NEWSLETTER_REPLY_TO }}" maxlength="100" class="inputbox" /></dd>
+	</dl>
+</fieldset>
+
+<fieldset>
+	<legend>{{ lang('NL_APPEARANCE') }}</legend>
+
+	<dl>
+		<dt><label>{{ lang('NL_BANNER_CURRENT') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_BANNER_MANAGED_ELSEWHERE', '<a href="' ~ U_COMPOSE ~ '">', '</a>') }}</span></dt>
+		<dd>
+			{% if S_NL_BANNER %}
+				<div class="nl-banner-preview" style="display: inline-block; max-width: 100%; padding: 5px; background: #ffffff; border: 1px solid #cfcfcf; border-radius: 3px;">
+					<img src="{{ NL_BANNER_URL }}" alt="{{ lang('NL_BANNER') }}" style="display: block; max-width: 520px; max-height: 90px; width: auto; height: auto;" />
+				</div>
+				<p class="nl-hint">{{ NL_BANNER_FILE }} &mdash; {{ NL_BANNER_WIDTH }} &times; {{ NL_BANNER_HEIGHT }} {{ lang('NL_PIXELS') }}, {{ NL_BANNER_SIZE }} KB</p>
+				<dl>
+					<dt><label for="nl_banner_url_readonly">{{ lang('NL_BANNER_IMAGE_URL') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_BANNER_IMAGE_URL_EXPLAIN') }}</span></dt>
+					<dd><input type="text" id="nl_banner_url_readonly" value="{{ NL_BANNER_PUBLIC_URL }}" class="inputbox" readonly="readonly" onclick="this.select();" /></dd>
+				</dl>
+			{% else %}
+				<span class="nl-hint">{{ lang('NL_BANNER_NONE') }}</span>
+			{% endif %}
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_banner_link">{{ lang('NL_BANNER_LINK') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_BANNER_LINK_EXPLAIN') }}</span></dt>
+		<dd><input type="url" id="newsletter_banner_link" name="newsletter_banner_link" value="{{ NEWSLETTER_BANNER_LINK }}" maxlength="255" class="inputbox" placeholder="{{ lang('NL_BANNER_LINK_PLACEHOLDER') }}" /></dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_banner_min_height">{{ lang('NL_BANNER_HEIGHT_RANGE') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_BANNER_HEIGHT_RANGE_EXPLAIN') }}</span></dt>
+		<dd>
+			<input type="number" id="newsletter_banner_min_height" name="newsletter_banner_min_height" value="{{ NEWSLETTER_BANNER_MIN_H }}" min="20" max="1000" class="post" />
+			&ndash;
+			<input type="number" name="newsletter_banner_max_height" value="{{ NEWSLETTER_BANNER_MAX_H }}" min="20" max="1000" class="post" /> {{ lang('NL_PIXELS') }}
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_banner_min_width">{{ lang('NL_BANNER_WIDTH_RANGE') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_BANNER_WIDTH_RANGE_EXPLAIN') }}</span></dt>
+		<dd>
+			<input type="number" id="newsletter_banner_min_width" name="newsletter_banner_min_width" value="{{ NEWSLETTER_BANNER_MIN_W }}" min="50" max="5000" class="post" />
+			&ndash;
+			<input type="number" name="newsletter_banner_max_width" value="{{ NEWSLETTER_BANNER_MAX_W }}" min="50" max="5000" class="post" /> {{ lang('NL_PIXELS') }}
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_bbcode_smilies">{{ lang('NL_BBCODE_SMILIES') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_BBCODE_SMILIES_EXPLAIN') }}</span></dt>
+		<dd>
+			<label><input type="radio" id="newsletter_bbcode_smilies" name="newsletter_bbcode_smilies" value="1"{% if NEWSLETTER_BBCODE_SMILIES %} checked="checked"{% endif %} class="radio" /> {{ lang('YES') }}</label>
+			<label><input type="radio" name="newsletter_bbcode_smilies" value="0"{% if not NEWSLETTER_BBCODE_SMILIES %} checked="checked"{% endif %} class="radio" /> {{ lang('NO') }}</label>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_bbcode_urls">{{ lang('NL_BBCODE_URLS') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_BBCODE_URLS_EXPLAIN') }}</span></dt>
+		<dd>
+			<label><input type="radio" id="newsletter_bbcode_urls" name="newsletter_bbcode_urls" value="1"{% if NEWSLETTER_BBCODE_URLS %} checked="checked"{% endif %} class="radio" /> {{ lang('YES') }}</label>
+			<label><input type="radio" name="newsletter_bbcode_urls" value="0"{% if not NEWSLETTER_BBCODE_URLS %} checked="checked"{% endif %} class="radio" /> {{ lang('NO') }}</label>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_footer_text">{{ lang('NL_FOOTER_TEXT') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_FOOTER_TEXT_EXPLAIN') }} <strong>{{ lang('NL_LEAVE_EMPTY_DEFAULT') }}</strong></span></dt>
+		<dd><textarea id="newsletter_footer_text" name="newsletter_footer_text" rows="5" cols="76" class="inputbox">{{ NEWSLETTER_FOOTER_TEXT }}</textarea>
+			<details class="nl-default"><summary>{{ lang('NL_SHOW_DEFAULT') }}</summary><pre>{{ NL_PREDEF_FOOTER_TEXT }}</pre></details>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_footer_html">{{ lang('NL_FOOTER_HTML') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_FOOTER_HTML_EXPLAIN') }} <strong>{{ lang('NL_LEAVE_EMPTY_DEFAULT') }}</strong></span></dt>
+		<dd><textarea id="newsletter_footer_html" name="newsletter_footer_html" rows="5" cols="76" class="inputbox nl-mono">{{ NEWSLETTER_FOOTER_HTML }}</textarea>
+			<details class="nl-default"><summary>{{ lang('NL_SHOW_DEFAULT') }}</summary><pre>{{ NL_PREDEF_FOOTER_HTML }}</pre></details>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_css">{{ lang('NL_DEFAULT_CSS') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_DEFAULT_CSS_EXPLAIN') }} <strong>{{ lang('NL_LEAVE_EMPTY_DEFAULT') }}</strong></span></dt>
+		<dd><textarea id="newsletter_css" name="newsletter_css" rows="8" cols="76" class="inputbox nl-mono">{{ NEWSLETTER_CSS }}</textarea>
+			<details class="nl-default"><summary>{{ lang('NL_SHOW_DEFAULT') }}</summary><pre>{{ NL_PREDEF_CSS }}</pre></details>
+		</dd>
+	</dl>
+</fieldset>
+
+<fieldset>
+	<legend>{{ lang('NL_MAINTENANCE') }}</legend>
+
+	<dl>
+		<dt><label for="newsletter_keep_days">{{ lang('NL_KEEP_DAYS') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_KEEP_DAYS_EXPLAIN') }}</span></dt>
+		<dd><input type="number" id="newsletter_keep_days" name="newsletter_keep_days" value="{{ NEWSLETTER_KEEP_DAYS }}" min="0" max="3650" class="post" /> {{ lang('NL_DAYS_UNIT') }}</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="newsletter_strip_emoji">{{ lang('NL_STRIP_EMOJI') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_STRIP_EMOJI_EXPLAIN') }}</span></dt>
+		<dd>
+			<label><input type="radio" id="newsletter_strip_emoji" name="newsletter_strip_emoji" value="1"{% if NEWSLETTER_STRIP_EMOJI %} checked="checked"{% endif %} class="radio" /> {{ lang('YES') }}</label>
+			<label><input type="radio" name="newsletter_strip_emoji" value="0"{% if not NEWSLETTER_STRIP_EMOJI %} checked="checked"{% endif %} class="radio" /> {{ lang('NO') }}</label>
+		</dd>
+	</dl>
+</fieldset>
+
+<fieldset class="submit-buttons">
+	<legend>{{ lang('SUBMIT') }}</legend>
+	<input class="button1" type="submit" name="submit" value="{{ lang('SUBMIT') }}" />
+	<input class="button2" type="reset" value="{{ lang('RESET') }}" />
+	{{ S_FORM_TOKEN }}
+</fieldset>
+
+</form>
+
+<script type="text/javascript">
+// Mostra il campo libero solo quando nella tendina si sceglie "personalizzato"
+(function () {
+	var tendine = document.querySelectorAll('select[data-nl-toggle]');
+
+	for (var i = 0; i < tendine.length; i++) {
+		(function (tendina) {
+			var campo = document.getElementById(tendina.getAttribute('data-nl-toggle'));
+
+			if (!campo) {
+				return;
+			}
+
+			var aggiorna = function () {
+				campo.style.display = (parseInt(tendina.value, 10) === 0) ? '' : 'none';
+			};
+
+			tendina.addEventListener('change', aggiorna);
+			aggiorna();
+		})(tendine[i]);
+	}
+})();
+</script>
+
+<!-- INCLUDE overall_footer.html -->

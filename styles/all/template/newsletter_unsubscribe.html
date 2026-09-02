@@ -1,0 +1,38 @@
+<!-- INCLUDECSS @salvocortesiano_newsletter/newsletter.css -->
+<!-- INCLUDE overall_header.html -->
+
+<h2>{{ lang('NL_UNSUBSCRIBE_TITLE') }}</h2>
+
+<div class="panel">
+	<div class="inner">
+
+		{% if S_NL_INVALID %}
+			<div class="nl-box nl-box-bad">
+				<p><strong>{{ lang('NL_UNSUBSCRIBE_INVALID') }}</strong></p>
+				<p>{{ lang('NL_UNSUBSCRIBE_INVALID_EXPLAIN') }}</p>
+			</div>
+		{% else %}
+			<div class="nl-box nl-box-ok">
+				{% if S_NL_ALREADY %}
+					<p><strong>{{ lang('NL_UNSUBSCRIBE_ALREADY') }}</strong></p>
+				{% elseif S_NL_ONE_LIST %}
+					<p><strong>{{ lang('NL_UNSUBSCRIBE_DONE_LIST', NL_LIST_NAME) }}</strong></p>
+				{% else %}
+					<p><strong>{{ lang('NL_UNSUBSCRIBE_DONE', NL_BOARD_NAME) }}</strong></p>
+				{% endif %}
+
+				{% if S_NL_REMAINING %}
+					<p>{{ lang('NL_UNSUBSCRIBE_REMAINING', NL_REMAINING) }}
+						{% if U_NL_ALL %}<a href="{{ U_NL_ALL }}">{{ lang('NL_UNSUBSCRIBE_ALL') }}</a>{% endif %}
+					</p>
+				{% endif %}
+				<p>{{ lang('NL_UNSUBSCRIBE_ADDRESS') }}{{ lang('COLON') }} <span class="nl-email">{{ NL_EMAIL }}</span></p>
+				<p>{{ lang('NL_UNSUBSCRIBE_NOTE') }}</p>
+				<p><a href="{{ U_NL_BOARD }}">{{ lang('NL_UNSUBSCRIBE_BACK', NL_BOARD_NAME) }}</a></p>
+			</div>
+		{% endif %}
+
+	</div>
+</div>
+
+<!-- INCLUDE overall_footer.html -->

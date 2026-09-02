@@ -1,0 +1,138 @@
+<!-- INCLUDE overall_header.html -->
+
+<link href="{{ U_NL_ACP_CSS }}" rel="stylesheet" type="text/css" media="screen" />
+
+<a id="maincontent"></a>
+
+<h1>{{ lang('NL_LOG_DETAIL') }}</h1>
+
+<p><a href="{{ U_BACK }}">&laquo; {{ lang('NL_BACK_TO_LOGS') }}</a></p>
+
+<fieldset>
+	<legend>{{ NL_SUBJECT }}</legend>
+
+	<dl><dt><label>{{ lang('NL_STATUS') }}{{ lang('COLON') }}</label></dt><dd><strong>{{ NL_STATUS }}</strong></dd></dl>
+	{% if NL_LIST %}<dl><dt><label>{{ lang('NL_LIST') }}{{ lang('COLON') }}</label></dt><dd>{{ NL_LIST }}</dd></dl>{% endif %}
+	<dl><dt><label>{{ lang('NL_RECIPIENTS') }}{{ lang('COLON') }}</label></dt><dd>{{ NL_GROUPS }}</dd></dl>
+	<dl><dt><label>{{ lang('NL_FORMAT') }}{{ lang('COLON') }}</label></dt><dd>{{ NL_FORMAT }} &middot; {{ lang('NL_PRIORITY') }}{{ lang('COLON') }} {{ NL_PRIORITY }} &middot; {{ lang('NL_IMPORTANCE') }}{{ lang('COLON') }} {{ NL_IMPORTANCE }}</dd></dl>
+	<dl><dt><label>{{ lang('NL_AUTHOR') }}{{ lang('COLON') }}</label></dt><dd>{{ NL_AUTHOR }} &middot; {{ NL_CREATED }}</dd></dl>
+	<dl><dt><label>{{ lang('NL_PLAN') }}{{ lang('COLON') }}</label></dt><dd>{{ lang('NL_PLAN_SIMPLE', NL_BATCH, NL_INTERVAL) }}</dd></dl>
+	{% if NL_STARTED %}<dl><dt><label>{{ lang('NL_STARTED_AT') }}{{ lang('COLON') }}</label></dt><dd>{{ NL_STARTED }}</dd></dl>{% endif %}
+	{% if NL_NEXT_RUN %}<dl><dt><label>{{ lang('NL_NEXT_RUN') }}{{ lang('COLON') }}</label></dt><dd>{{ NL_NEXT_RUN }}</dd></dl>{% endif %}
+	{% if NL_FINISHED %}<dl><dt><label>{{ lang('NL_FINISHED') }}{{ lang('COLON') }}</label></dt><dd>{{ NL_FINISHED }}</dd></dl>{% endif %}
+	{% if NL_PAUSE_REASON %}
+		<dl>
+			<dt><label>{{ lang('NL_PAUSED_LABEL') }}{{ lang('COLON') }}</label></dt>
+			<dd><strong class="nl-warn">{{ NL_PAUSE_REASON }}</strong></dd>
+		</dl>
+	{% endif %}
+	{% if NL_STALLED %}
+		<dl>
+			<dt><label>{{ lang('NL_STALLED_LABEL') }}{{ lang('COLON') }}</label></dt>
+			<dd><strong class="nl-warn">{{ NL_STALLED }}</strong></dd>
+		</dl>
+	{% endif %}
+
+	{% if S_DONE and S_ARCHIVE_ON %}
+		<dl>
+			<dt><label>{{ lang('NL_ARCHIVE') }}{{ lang('COLON') }}</label></dt>
+			<dd>
+				{% if S_PUBLIC %}
+					<strong class="nl-ok">{{ lang('NL_ARCHIVE_IS_PUBLIC') }}</strong> &middot; {{ NL_VIEWS }} {{ lang('NL_ARCHIVE_VIEWS') }}
+				{% else %}
+					<span class="nl-hint">{{ lang('NL_ARCHIVE_IS_PRIVATE') }}</span>
+				{% endif %}
+			</dd>
+		</dl>
+	{% endif %}
+</fieldset>
+
+<fieldset>
+	<legend>{{ lang('NL_COUNTERS') }}</legend>
+
+	<div class="nl-counters">
+		<div class="nl-counter"><span class="nl-counter-value">{{ NL_TOTAL }}</span><span class="nl-counter-label">{{ lang('NL_TOTAL_RECIPIENTS') }}</span></div>
+		<div class="nl-counter nl-counter-ok"><span class="nl-counter-value">{{ NL_SENT }}</span><span class="nl-counter-label">{{ lang('NL_QUEUE_SENT') }}</span></div>
+		<div class="nl-counter nl-counter-wait"><span class="nl-counter-value">{{ NL_PENDING }}</span><span class="nl-counter-label">{{ lang('NL_QUEUE_PENDING') }}</span></div>
+		<div class="nl-counter nl-counter-bad"><span class="nl-counter-value">{{ NL_FAILED }}</span><span class="nl-counter-label">{{ lang('NL_QUEUE_FAILED') }}</span></div>
+		<div class="nl-counter nl-counter-state {{ NL_STATE_CLASS }}"><span class="nl-counter-state-value">{{ NL_STATUS }}</span><span class="nl-counter-label">{{ lang('NL_STATUS') }}</span></div>
+	</div>
+
+	<div class="nl-bar nl-bar-big"><span style="width: {{ NL_PERCENT }}%;"></span></div>
+	<p class="nl-hint">{{ NL_PERCENT }}%</p>
+</fieldset>
+
+<fieldset class="submit-buttons">
+	<legend>{{ lang('ACTION') }}</legend>
+	{% if S_RUNNING %}
+		<a class="button2" href="{{ U_RUN }}">{{ lang('NL_BUTTON_RUN') }}</a>
+		<a class="button2" href="{{ U_PAUSE }}">{{ lang('NL_BUTTON_PAUSE') }}</a>
+		<a class="button2" href="{{ U_CANCEL }}">{{ lang('NL_BUTTON_CANCEL') }}</a>
+	{% endif %}
+	{% if S_PAUSED %}
+		<a class="button2" href="{{ U_RESUME }}">{{ lang('NL_BUTTON_RESUME') }}</a>
+		<a class="button2" href="{{ U_CANCEL }}">{{ lang('NL_BUTTON_CANCEL') }}</a>
+	{% endif %}
+	{% if S_HAS_FAILED %}
+		<a class="button2" href="{{ U_REQUEUE }}">{{ lang('NL_BUTTON_REQUEUE') }}</a>
+	{% endif %}
+	{% if S_DONE and S_ARCHIVE_ON %}
+		{% if S_PUBLIC %}
+			<a class="button2" href="{{ U_ARCHIVE_VIEW }}" target="_blank" rel="noopener noreferrer">{{ lang('NL_BUTTON_ARCHIVE_VIEW') }}</a>
+			<a class="button2" href="{{ U_UNPUBLISH }}">{{ lang('NL_BUTTON_UNPUBLISH') }}</a>
+		{% else %}
+			<a class="button2" href="{{ U_PUBLISH }}">{{ lang('NL_BUTTON_PUBLISH') }}</a>
+		{% endif %}
+	{% endif %}
+	<a class="button2" href="{{ U_DELETE }}">{{ lang('NL_BUTTON_DELETE_LOG') }}</a>
+</fieldset>
+
+<fieldset class="tabulated">
+	<legend>{{ lang('NL_RECIPIENT_LIST') }}</legend>
+
+	<p class="quick">
+		{% for filtro in filtri %}
+			{% if not loop.first %} &middot; {% endif %}
+			{% if filtro.S_SELECTED %}<strong>{{ filtro.NAME }}</strong>{% else %}<a href="{{ filtro.U_FILTER }}">{{ filtro.NAME }}</a>{% endif %}
+		{% endfor %}
+	</p>
+
+	<table class="table1">
+		<thead>
+		<tr>
+			<th>{{ lang('USERNAME') }}</th>
+			<th style="width: 230px;">{{ lang('EMAIL_ADDRESS') }}</th>
+			<th style="width: 100px;">{{ lang('NL_STATUS') }}</th>
+			<th style="width: 70px;">{{ lang('NL_ATTEMPTS') }}</th>
+			<th style="width: 150px;">{{ lang('NL_LAST_TRY') }}</th>
+			<th>{{ lang('NL_ERROR') }}</th>
+		</tr>
+		</thead>
+		<tbody>
+		{% for riga in destinatari %}
+			<tr>
+				<td>{{ riga.USERNAME }}</td>
+				<td>{{ riga.EMAIL }}</td>
+				<td style="text-align: center;">
+					{% if riga.S_SENT %}<strong class="nl-ok">{{ riga.STATUS }}</strong>
+					{% elseif riga.S_FAILED %}<strong class="nl-warn">{{ riga.STATUS }}</strong>
+					{% else %}<span class="nl-hint">{{ riga.STATUS }}</span>{% endif %}
+				</td>
+				<td style="text-align: center;">{{ riga.ATTEMPTS }}</td>
+				<td style="text-align: center;">{{ riga.TIME }}</td>
+				<td><span class="small">{{ riga.ERROR }}</span></td>
+			</tr>
+		{% else %}
+			<tr><td colspan="6" style="text-align: center;">{{ lang('NL_NO_RECIPIENTS_ROWS') }}</td></tr>
+		{% endfor %}
+		</tbody>
+	</table>
+</fieldset>
+
+<!-- IF .pagination -->
+	<div class="pagination">
+		<!-- INCLUDE pagination.html -->
+	</div>
+<!-- ENDIF -->
+
+<!-- INCLUDE overall_footer.html -->

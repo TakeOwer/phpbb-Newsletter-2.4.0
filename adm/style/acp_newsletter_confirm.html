@@ -1,0 +1,77 @@
+<!-- INCLUDE overall_header.html -->
+
+<link href="{{ U_NL_ACP_CSS }}" rel="stylesheet" type="text/css" media="screen" />
+
+<a id="maincontent"></a>
+
+<h1>{{ lang('NL_CONFIRM_TITLE') }}</h1>
+
+<p>{{ lang('NL_CONFIRM_EXPLAIN') }}</p>
+
+{% if S_NO_RECIPIENTS %}
+	<div class="errorbox">
+		<h3>{{ lang('WARNING') }}</h3>
+		<p>{{ lang('NL_ERROR_NO_RECIPIENTS') }}</p>
+	</div>
+{% endif %}
+
+{% if S_MANY_RECIPIENTS %}
+	<div class="errorbox nl-bigwarn">
+		<h3>{{ lang('NL_MANY_RECIPIENTS_TITLE') }}</h3>
+		<p>{{ lang('NL_MANY_RECIPIENTS', NL_TOTAL, NL_THRESHOLD) }}</p>
+		<p>{{ lang('NL_MANY_RECIPIENTS_PLAN', NL_BATCH, NL_INTERVAL, NL_BATCHES, NL_DURATION) }}</p>
+	</div>
+{% endif %}
+
+<form id="newsletter_confirm" method="post" action="{{ U_ACTION }}">
+
+<fieldset>
+	<legend>{{ lang('NL_CONFIRM_SUMMARY') }}</legend>
+
+	<dl><dt><label>{{ lang('NL_SUBJECT') }}{{ lang('COLON') }}</label></dt><dd><strong>{{ NL_SUBJECT }}</strong></dd></dl>
+	<dl><dt><label>{{ lang('NL_FORMAT') }}{{ lang('COLON') }}</label></dt><dd>{{ NL_FORMAT }}</dd></dl>
+	{% if NL_LIST %}<dl><dt><label>{{ lang('NL_LIST') }}{{ lang('COLON') }}</label></dt><dd><strong>{{ NL_LIST }}</strong></dd></dl>{% endif %}
+	<dl><dt><label>{{ lang('NL_LANG') }}{{ lang('COLON') }}</label></dt><dd>{{ NL_LANG }}</dd></dl>
+
+	<dl>
+		<dt><label>{{ lang('NL_RECIPIENTS') }}{{ lang('COLON') }}</label></dt>
+		<dd>
+			{% for gruppo in gruppi %}{% if not loop.first %}, {% endif %}{{ gruppo.NAME }}{% endfor %}
+			{% if S_SUBS %}{% if gruppi %}, {% endif %}{{ lang('NL_SUBSCRIBERS_LABEL') }}{% endif %}
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label>{{ lang('NL_TOTAL_RECIPIENTS') }}{{ lang('COLON') }}</label></dt>
+		<dd><strong class="nl-big">{{ NL_TOTAL }}</strong></dd>
+	</dl>
+
+	<dl>
+		<dt><label>{{ lang('NL_PLAN') }}{{ lang('COLON') }}</label></dt>
+		<dd>{{ lang('NL_PLAN_VALUE', NL_BATCH, NL_INTERVAL, NL_BATCHES) }}</dd>
+	</dl>
+
+	<dl>
+		<dt><label>{{ lang('NL_DURATION') }}{{ lang('COLON') }}</label></dt>
+		<dd>{{ NL_DURATION }} &mdash; <span class="nl-hint">{{ lang('NL_ETA') }}{{ lang('COLON') }} {{ NL_ETA }}</span></dd>
+	</dl>
+
+	<dl>
+		<dt><label>{{ lang('NL_SCHEDULE') }}{{ lang('COLON') }}</label></dt>
+		<dd>{{ NL_SCHEDULE }}</dd>
+	</dl>
+</fieldset>
+
+<fieldset class="submit-buttons">
+	<legend>{{ lang('SUBMIT') }}</legend>
+	<input type="hidden" name="campaign_id" value="{{ CAMPAIGN_ID }}" />
+	<a class="button2" href="{{ U_BACK }}">{{ lang('NL_BUTTON_BACK') }}</a>
+	{% if not S_NO_RECIPIENTS %}
+		<input class="button1" type="submit" name="submit_confirm" value="{{ lang('NL_BUTTON_SEND_NOW') }}" />
+	{% endif %}
+	{{ S_FORM_TOKEN }}
+</fieldset>
+
+</form>
+
+<!-- INCLUDE overall_footer.html -->

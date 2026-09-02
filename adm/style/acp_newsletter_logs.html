@@ -1,0 +1,86 @@
+<!-- INCLUDE overall_header.html -->
+
+<link href="{{ U_NL_ACP_CSS }}" rel="stylesheet" type="text/css" media="screen" />
+
+<a id="maincontent"></a>
+
+<h1>{{ lang('ACP_NEWSLETTER_LOGS') }}</h1>
+
+<p>{{ lang('ACP_NEWSLETTER_LOGS_EXPLAIN') }}</p>
+
+<form id="newsletter_logs" method="post" action="{{ U_ACTION }}">
+
+<fieldset class="tabulated">
+	<legend>{{ lang('ACP_NEWSLETTER_LOGS') }}</legend>
+	<p class="quick">{{ TOTAL_CAMPAIGNS }} &mdash; <a href="{{ U_COMPOSE }}">{{ lang('NL_BUTTON_NEW') }}</a></p>
+
+	{% if NL_PENDING %}
+		<div class="nl-note nl-note-warn">
+			<span class="nl-note-icon">!</span>
+			<div class="nl-note-body">{{ lang('NL_PENDING_NOTICE', NL_PENDING) }}</div>
+		</div>
+	{% endif %}
+
+	<table class="table1">
+		<thead>
+		<tr>
+			<th>{{ lang('NL_SUBJECT') }}</th>
+			<th style="width: 130px;">{{ lang('NL_RECIPIENTS') }}</th>
+			<th style="width: 90px;">{{ lang('NL_STATUS') }}</th>
+			<th style="width: 70px;">{{ lang('NL_QUEUE_SENT') }}</th>
+			<th style="width: 70px;">{{ lang('NL_QUEUE_PENDING') }}</th>
+			<th style="width: 70px;">{{ lang('NL_QUEUE_FAILED') }}</th>
+			<th style="width: 120px;">{{ lang('NL_PROGRESS') }}</th>
+			<th style="width: 150px;">{{ lang('ACTION') }}</th>
+		</tr>
+		</thead>
+		<tbody>
+		{% for campagna in campagne %}
+			<tr>
+				<td>
+					<a href="{{ campagna.U_VIEW }}"><strong>{{ campagna.SUBJECT }}</strong></a><br />
+					<span class="small">{{ campagna.CREATED }} &middot; {{ campagna.AUTHOR }} &middot; {{ campagna.FORMAT }}{% if campagna.LIST_NAME %} &middot; {{ campagna.LIST_NAME }}{% endif %}{% if campagna.STALLED %} &middot; <span class="nl-warn">{{ campagna.STALLED }}</span>{% endif %}{% if campagna.S_PUBLIC %} &middot; <span class="nl-flag">{{ lang('NL_ARCHIVE_PUBLISHED') }} ({{ campagna.VIEWS }})</span>{% endif %}</span>
+				</td>
+				<td>{{ campagna.GROUPS }}</td>
+				<td style="text-align: center;"><span class="nl-status nl-status-{{ campagna.STATUS_CODE }}">{{ campagna.STATUS }}</span></td>
+				<td style="text-align: center;"><strong class="nl-ok">{{ campagna.SENT }}</strong></td>
+				<td style="text-align: center;">{{ campagna.PENDING }}</td>
+				<td style="text-align: center;"><strong class="nl-warn">{{ campagna.FAILED }}</strong></td>
+				<td>
+					<div class="nl-bar"><span style="width: {{ campagna.PERCENT }}%;"></span></div>
+					<span class="small">{{ campagna.PERCENT }}% {{ lang('NL_OF') }} {{ campagna.TOTAL }}</span>
+				</td>
+				<td style="text-align: center;">
+					<a href="{{ campagna.U_VIEW }}">{{ lang('NL_ACTION_DETAILS') }}</a>
+					{% if campagna.S_DRAFT %} &middot; <a href="{{ campagna.U_EDIT }}">{{ lang('EDIT') }}</a>{% endif %}
+					{% if campagna.S_PENDING %} &middot; <a href="{{ campagna.U_APPROVE }}"><strong>{{ lang('NL_APPROVE') }}</strong></a> &middot; <a href="{{ campagna.U_REJECT }}">{{ lang('NL_REJECT') }}</a>{% endif %}
+					{% if campagna.S_RUNNING %} &middot; <a href="{{ campagna.U_RUN }}">{{ lang('NL_ACTION_RUN') }}</a> &middot; <a href="{{ campagna.U_PAUSE }}">{{ lang('NL_ACTION_PAUSE') }}</a>{% endif %}
+					{% if campagna.S_PAUSED %} &middot; <a href="{{ campagna.U_RESUME }}">{{ lang('NL_ACTION_RESUME') }}</a>{% endif %}
+					&middot; <a href="{{ campagna.U_DELETE }}">{{ lang('DELETE') }}</a>
+				</td>
+			</tr>
+		{% else %}
+			<tr><td colspan="8" style="text-align: center;">{{ lang('NL_NO_CAMPAIGNS') }}</td></tr>
+		{% endfor %}
+		</tbody>
+	</table>
+</fieldset>
+
+<!-- IF .pagination -->
+	<div class="pagination">
+		<!-- INCLUDE pagination.html -->
+	</div>
+<!-- ENDIF -->
+
+{% if campagne %}
+	<fieldset class="submit-buttons">
+		<legend>{{ lang('NL_MAINTENANCE') }}</legend>
+		<a class="button2" href="{{ U_DELETE_ALL }}">{{ lang('NL_BUTTON_DELETE_ALL') }}</a>
+		<br /><span class="nl-hint">{{ lang('NL_DELETE_ALL_EXPLAIN') }}</span>
+	</fieldset>
+{% endif %}
+
+{{ S_FORM_TOKEN }}
+</form>
+
+<!-- INCLUDE overall_footer.html -->
