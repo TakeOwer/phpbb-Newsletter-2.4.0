@@ -121,7 +121,11 @@ English and Italian, complete and kept in step — 646 keys each. Translations a
 Written by **salvocortesiano** for [Le Ombre della Rete 360°](https://netshadows.de).
 Some of the design was informed by reading **spiderpiggy/newsletter**, an earlier extension with a similar purpose. Where the two differ — a queue that doesn't duplicate the message body, retries instead of a single fatal attempt, and BBCode handled by phpBB's own formatter rather than a hand-written converter — those were deliberate departures.
 
-
+![Version](https://img.shields.io/badge/version-2.4.0-blue)
+![phpBB](https://img.shields.io/badge/phpBB-3.3-brightgreen)
+![PHP](https://img.shields.io/badge/PHP-7.1%20–%208.3-777bb4)
+![License](https://img.shields.io/badge/license-GPL--2.0-lightgrey)
+![Languages](https://img.shields.io/badge/languages-EN%20·%20IT-orange)
 
 # Newsletter
 
