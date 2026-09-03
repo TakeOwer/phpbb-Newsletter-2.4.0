@@ -33,6 +33,9 @@ $lang = array_merge($lang, array(
 	'ACP_NEWSLETTER_LOGS'				=> 'Log',
 	'ACP_NEWSLETTER_LOGS_EXPLAIN'		=> 'Every newsletter, with how many messages were delivered, how many are still waiting and how many failed. Open one to see the recipients one by one and the reason behind each failure.',
 
+	'ACP_NEWSLETTER_TEST'				=> 'Health check',
+	'ACP_NEWSLETTER_TEST_EXPLAIN'		=> 'Two tools for telling whether things are in order: a check that reads the state of the installation without touching anything, and a send test that mails a dummy newsletter to the addresses you name.',
+
 	'ACP_NEWSLETTER_SETTINGS'			=> 'Settings',
 	'ACP_NEWSLETTER_SETTINGS_EXPLAIN'	=> 'Defaults for new newsletters, subscription behaviour and the footer added to every message. Values set here can be adjusted for a single newsletter while writing it.',
 ));

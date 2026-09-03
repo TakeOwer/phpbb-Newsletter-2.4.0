@@ -59,6 +59,24 @@ services:
             - '%core.root_path%'
             - '%core.php_ext%'
 
+    salvocortesiano.newsletter.selftest:
+        class: salvocortesiano\newsletter\core\selftest
+        arguments:
+            - '@config'
+            - '@dbal.conn'
+            - '@dbal.tools'
+            - '@language'
+            - '@controller.helper'
+            - '@ext.manager'
+            - '@salvocortesiano.newsletter.manager'
+            - '@salvocortesiano.newsletter.mailer'
+            - '@salvocortesiano.newsletter.access'
+            - '@salvocortesiano.newsletter.bbcode'
+            - '@salvocortesiano.newsletter.html'
+            - '%core.table_prefix%'
+            - '%core.root_path%'
+            - '%core.php_ext%'
+
     salvocortesiano.newsletter.diagnostics:
         class: salvocortesiano\newsletter\core\diagnostics
         arguments:

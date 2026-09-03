@@ -90,6 +90,9 @@ class manager
 	/** @var array Testi gia letti dai file di lingua di altre lingue */
 	protected $lang_cache = array();
 
+	/** @var bool Il file di lingua dell'estensione e gia stato caricato */
+	protected $lang_loaded = false;
+
 	/**
 	 * Constructor
 	 */
@@ -414,6 +417,34 @@ class manager
 	public function unsubscribe_link(array $user_row, $list_id = 0)
 	{
 		return $this->mailer->unsubscribe_url($user_row, $list_id);
+	}
+
+	/**
+	 * Carica il file di lingua dell'estensione, una volta per richiesta.
+	 *
+	 * @return void
+	 */
+	protected function ensure_lang()
+	{
+		if ($this->lang_loaded)
+		{
+			return;
+		}
+
+		$this->lang_loaded = true;
+
+		try
+		{
+			$this->language->add_lang('newsletter', 'salvocortesiano/newsletter');
+		}
+		catch (\Exception $e)
+		{
+			// File gia caricato o non trovato: si prosegue comunque, perche
+			// un messaggio senza testo tradotto e meglio di nessun messaggio
+		}
+		catch (\Throwable $e)
+		{
+		}
 	}
 
 	/**
@@ -795,6 +826,12 @@ class manager
 	 */
 	protected function lang_for($iso, $chiave)
 	{
+		// I messaggi di servizio partono anche dal cron, dove nessuno ha
+		// caricato il file di lingua dell'estensione: senza questa riga
+		// lang() restituisce la chiave stessa, e nella casella arriva
+		// NL_MAIL_REPORT_SUBJECT al posto del testo
+		$this->ensure_lang();
+
 		$iso = trim((string) $iso);
 
 		// Il codice finisce in un percorso: solo lettere, cifre e trattini,
@@ -1290,6 +1327,10 @@ class manager
 	 */
 	public function prepare_campaign(array $campagna)
 	{
+		// Titolo degli argomenti in evidenza e richiamo all'archivio passano
+		// da qui, e questo metodo gira anche dal cron
+		$this->ensure_lang();
+
 		$formato = isset($campagna['campaign_format']) ? (int) $campagna['campaign_format'] : self::FORMAT_TEXT;
 
 		if ($formato === self::FORMAT_BBCODE)
@@ -2115,6 +2156,10 @@ class manager
 	 */
 	public function process($campaign_id = 0, $ignore_interval = false)
 	{
+		// Il motivo della pausa e i messaggi di resoconto sono testi tradotti,
+		// e da qui si passa soprattutto quando nessuno ha caricato la lingua
+		$this->ensure_lang();
+
 		$esito = array(
 			'campaign_id'	=> 0,
 			'subject'		=> '',
@@ -2283,7 +2328,11 @@ class manager
 				'queue_status'		=> $nuovo_stato,
 				'queue_attempts'	=> $tentativi,
 				'queue_time'		=> time(),
-				'queue_error'		=> $inviata ? '' : $errore,
+				// L'errore va ripulito qui, non solo dove lo si legge: e questo
+				// il testo che finisce nella colonna del registro, ed e li che
+				// serve leggibile. La risposta del server dice tutto; il
+				// tracciato della chiamata occupa lo spazio e non dice niente
+				'queue_error'		=> $inviata ? '' : $this->truncate_error($errore),
 			);
 
 			$this->db->sql_query('UPDATE ' . $this->queue_table . '
@@ -2606,7 +2655,45 @@ class manager
 	 */
 	protected function truncate_error($testo)
 	{
-		$testo = trim(preg_replace('/\s+/', ' ', (string) $testo));
+		$testo = (string) $testo;
+		$grezzo = $testo;
+
+		// phpBB restituisce l'errore avvolto nel proprio testo, con il numero
+		// di riga, il tracciato della chiamata e l'intera conversazione con il
+		// server. Nella colonna del registro entrano 240 caratteri: sprecarli
+		// per il tracciato significa perdere proprio la riga che spiega perche
+		// il messaggio non e partito
+		$tagliato = preg_split('/\bBacktrace\b|<br\s*\/?>/i', $testo);
+		$testo = isset($tagliato[0]) ? $tagliato[0] : $testo;
+
+		$testo = html_entity_decode(strip_tags($testo), ENT_QUOTES, 'UTF-8');
+		$testo = trim(preg_replace('/\s+/', ' ', $testo));
+
+		// La risposta del server e la parte che conta: "550 No such recipient
+		// here" dice tutto, e dice anche - dal 5 iniziale - che ritentare non
+		// servirebbe a niente
+		// I codici estesi contengono punti - 4.2.2, 5.1.2 - quindi il punto non
+		// puo fare da terminatore. Si prende fino al primo segno di minore,
+		// che e dove il server ripete l'indirizzo, e si ripulisce la coda
+		if (preg_match('/\b([45][0-9]{2})[ \-]+([^<]{3,160})/', $testo, $trovato))
+		{
+			$risposta = trim($trovato[1] . ' ' . trim($trovato[2]));
+			$risposta = rtrim($risposta, " \t.,;:-");
+
+			// Il codice compare anche in frasi discorsive: si tiene solo se
+			// somiglia davvero a una risposta SMTP
+			if (strlen($risposta) > 6)
+			{
+				$testo = $risposta;
+			}
+		}
+
+		// Se dopo la pulizia non resta niente - un messaggio fatto di solo
+		// tracciato - meglio la forma grezza accorciata che una cella vuota
+		if ($testo === '')
+		{
+			$testo = trim(preg_replace('/\s+/', ' ', strip_tags($grezzo)));
+		}
 
 		return function_exists('utf8_substr') ? utf8_substr($testo, 0, 240) : substr($testo, 0, 240);
 	}

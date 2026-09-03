@@ -572,3 +572,36 @@
 .nl-counter.nl-state-pending .nl-counter-state-value { color: #8a5a11; }
 
 .nl-counter.nl-state-draft .nl-counter-state-value { color: #666666; }
+
+/* Scheda Verifica */
+
+.nl-test td {
+	vertical-align: top;
+	padding: 5px 8px;
+}
+
+.nl-test-section th {
+	text-align: left;
+	padding: 10px 8px 4px;
+	font-size: 12px;
+	color: #555555;
+	background: transparent;
+	border-bottom: 1px solid #e3e6e9;
+}
+
+.nl-test-mark {
+	width: 24px;
+	text-align: center;
+	font-weight: bold;
+}
+
+.nl-test-label {
+	width: 300px;
+	color: #444444;
+}
+
+.nl-test-ok .nl-test-mark { color: #2f8132; }
+.nl-test-warn .nl-test-mark { color: #c8860a; }
+.nl-test-warn { background: #fdf9f0; }
+.nl-test-error .nl-test-mark { color: #bc2a4d; }
+.nl-test-error { background: #fdf1f4; }

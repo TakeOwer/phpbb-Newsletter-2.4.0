@@ -3,7 +3,7 @@
     "type": "phpbb-extension",
     "description": "Newsletter per phpBB: iscrizione volontaria dal pannello utente con email di conferma e cancellazione con un clic, invio a gruppi selezionabili, formato testo o HTML con CSS reso inline, priorita e importanza, invio a lotti temporizzato per rispettare i limiti dell'host, registro dettagliato con conteggio di recapitate, in attesa e fallite.",
     "homepage": "https://github.com/salvocortesiano/newsletter",
-    "version": "2.4.0",
+    "version": "2.6.3",
     "time": "2026-08-30",
     "keywords": [
         "phpbb",

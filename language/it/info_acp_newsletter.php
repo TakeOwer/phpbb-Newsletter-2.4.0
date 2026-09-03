@@ -33,6 +33,9 @@ $lang = array_merge($lang, array(
 	'ACP_NEWSLETTER_LOGS'				=> 'Registro',
 	'ACP_NEWSLETTER_LOGS_EXPLAIN'		=> 'Tutte le newsletter, con quante email sono state recapitate, quante sono ancora in attesa e quante sono fallite. Aprendone una vedi i destinatari uno per uno e il motivo di ogni fallimento.',
 
+	'ACP_NEWSLETTER_TEST'				=> 'Verifica',
+	'ACP_NEWSLETTER_TEST_EXPLAIN'		=> 'Due strumenti per capire se tutto è a posto: un controllo che legge lo stato dell\'installazione senza toccare niente, e una prova d\'invio che manda una newsletter finta ai soli indirizzi che indichi tu.',
+
 	'ACP_NEWSLETTER_SETTINGS'			=> 'Impostazioni',
 	'ACP_NEWSLETTER_SETTINGS_EXPLAIN'	=> 'Valori predefiniti per le nuove newsletter, comportamento delle iscrizioni e piè di pagina aggiunto a ogni messaggio. Quanto imposti qui può essere modificato per la singola newsletter mentre la scrivi.',
 ));

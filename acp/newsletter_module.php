@@ -99,6 +99,11 @@ class newsletter_module
 				$this->logs();
 			break;
 
+			case 'test':
+				$this->page_title = 'ACP_NEWSLETTER_TEST';
+				$this->test();
+			break;
+
 			case 'settings':
 				$this->tpl_name = 'acp_newsletter_settings';
 				$this->page_title = 'ACP_NEWSLETTER_SETTINGS';
@@ -1456,6 +1461,98 @@ class newsletter_module
 		confirm_box(false, $this->language->lang('NL_CONFIRM_DELETE_ALL'), build_hidden_fields(array(
 			'action' => 'delete_all',
 		)));
+	}
+
+	/* =====================================================================
+	 * Verifica
+	 * ================================================================== */
+
+	/**
+	 * Controlla lo stato dell'installazione e, a richiesta, prova un invio
+	 */
+	protected function test()
+	{
+		$this->tpl_name = 'acp_newsletter_test';
+
+		global $phpbb_container;
+
+		/** @var \salvocortesiano\newsletter\core\selftest $verifica */
+		$verifica = $phpbb_container->get('salvocortesiano.newsletter.selftest');
+
+		$form_key = 'newsletter_test';
+		add_form_key($form_key);
+
+		$eseguito = '';
+		$indirizzo = trim((string) $this->user->data['user_email']);
+		$inesistenti = 0;
+		$rifiutati = 0;
+		$soglia = 0;
+
+		if ($this->request->is_set_post('submit_checks') || $this->request->is_set_post('submit_send'))
+		{
+			if (!check_form_key($form_key))
+			{
+				trigger_error($this->language->lang('FORM_INVALID') . adm_back_link($this->u_action), E_USER_WARNING);
+			}
+
+			if ($this->request->is_set_post('submit_checks'))
+			{
+				$verifica->run_checks();
+				$eseguito = 'checks';
+			}
+			else
+			{
+				$indirizzo = trim($this->decode($this->request->variable('nl_test_email', '', true)));
+				$inesistenti = max(0, min(30, $this->request->variable('nl_test_invalid', 0)));
+				$rifiutati = max(0, min(30, $this->request->variable('nl_test_rejected', 0)));
+				$soglia = max(0, min(50, $this->request->variable('nl_test_threshold', 0)));
+
+				$verifica->run_send_test($this->user->data, $indirizzo, $inesistenti, $rifiutati, $soglia);
+				$eseguito = 'send';
+			}
+
+			foreach ($verifica->get_rows() as $riga)
+			{
+				$this->template->assign_block_vars('righe', array(
+					'S_SECTION'	=> ($riga['type'] === 'section'),
+					'TYPE'		=> $riga['type'],
+					'LABEL'		=> $riga['label'],
+					'VALUE'		=> $riga['value'],
+				));
+			}
+
+			$totali = $verifica->get_totals();
+
+			$this->template->assign_vars(array(
+				'NL_TEST_OK'		=> $totali['ok'],
+				'NL_TEST_WARN'		=> $totali['warn'],
+				'NL_TEST_ERROR'		=> $totali['error'],
+				'S_TEST_CLASS'		=> $totali['error'] ? 'bad' : ($totali['warn'] ? 'warn' : 'ok'),
+			));
+		}
+
+		$this->template->assign_vars(array_merge($this->identity_vars(), array(
+			'S_TEST_DONE'		=> ($eseguito !== ''),
+			'S_TEST_SEND'		=> ($eseguito === 'send'),
+			'NL_TEST_EMAIL'		=> htmlspecialchars($indirizzo, ENT_COMPAT, 'UTF-8'),
+			'NL_TEST_INVALID'	=> $inesistenti,
+			'NL_TEST_REJECTED'	=> $rifiutati,
+			'NL_TEST_THRESHOLD'	=> $soglia,
+			'NL_TEST_DOMAIN'	=> htmlspecialchars($this->board_domain(), ENT_COMPAT, 'UTF-8'),
+			'U_ACTION'			=> $this->u_action,
+		)));
+	}
+
+	/**
+	 * Dominio del forum, per spiegare cosa fanno gli indirizzi rifiutati
+	 *
+	 * @return string
+	 */
+	protected function board_domain()
+	{
+		$pezzi = explode('@', (string) $this->config['board_email']);
+
+		return (count($pezzi) === 2) ? $pezzi[1] : '';
 	}
 
 	/* =====================================================================

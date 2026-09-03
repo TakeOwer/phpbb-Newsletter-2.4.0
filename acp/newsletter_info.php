@@ -42,6 +42,11 @@ class newsletter_info
 					'auth'	=> 'ext_salvocortesiano/newsletter && acl_a_newsletter',
 					'cat'	=> array('ACP_NEWSLETTER'),
 				),
+				'test'		=> array(
+					'title'	=> 'ACP_NEWSLETTER_TEST',
+					'auth'	=> 'ext_salvocortesiano/newsletter && acl_a_newsletter',
+					'cat'	=> array('ACP_NEWSLETTER'),
+				),
 				'settings'	=> array(
 					'title'	=> 'ACP_NEWSLETTER_SETTINGS',
 					'auth'	=> 'ext_salvocortesiano/newsletter && acl_a_newsletter',

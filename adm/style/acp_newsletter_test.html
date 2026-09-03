@@ -1,0 +1,83 @@
+<!-- INCLUDE overall_header.html -->
+
+<link href="{{ U_NL_ACP_CSS }}" rel="stylesheet" type="text/css" media="screen" />
+
+<a id="maincontent"></a>
+
+<h1>{{ lang('ACP_NEWSLETTER_TEST') }}</h1>
+
+<p>{{ lang('ACP_NEWSLETTER_TEST_EXPLAIN') }}</p>
+
+{% if S_TEST_DONE %}
+	<fieldset>
+		<legend>{% if S_TEST_SEND %}{{ lang('NL_TEST_SEND') }}{% else %}{{ lang('NL_TEST_CHECKS') }}{% endif %}</legend>
+
+		<table class="table1 nl-test">
+			<tbody>
+			{% for riga in righe %}
+				{% if riga.S_SECTION %}
+					<tr class="nl-test-section"><th colspan="3">{{ riga.LABEL }}</th></tr>
+				{% else %}
+					<tr class="nl-test-{{ riga.TYPE }}">
+						<td class="nl-test-mark">{% if riga.TYPE == 'ok' %}&#10003;{% elseif riga.TYPE == 'warn' %}!{% else %}&#10007;{% endif %}</td>
+						<td class="nl-test-label">{{ riga.LABEL }}</td>
+						<td>{{ riga.VALUE }}</td>
+					</tr>
+				{% endif %}
+			{% endfor %}
+			</tbody>
+		</table>
+
+		<div class="nl-note nl-note-{% if S_TEST_CLASS == 'bad' %}bad{% elseif S_TEST_CLASS == 'warn' %}warn{% else %}ok{% endif %}">
+			<span class="nl-note-icon">{% if S_TEST_CLASS == 'bad' %}&#10007;{% elseif S_TEST_CLASS == 'warn' %}!{% else %}&#10003;{% endif %}</span>
+			<div class="nl-note-body">{{ lang('NL_TEST_SUMMARY', NL_TEST_OK, NL_TEST_WARN, NL_TEST_ERROR) }}</div>
+		</div>
+	</fieldset>
+{% endif %}
+
+<form id="newsletter_test" method="post" action="{{ U_ACTION }}">
+
+<fieldset>
+	<legend>{{ lang('NL_TEST_CHECKS') }}</legend>
+
+	<p>{{ lang('NL_TEST_CHECKS_EXPLAIN') }}</p>
+
+	<fieldset class="submit-buttons">
+		<input class="button1" type="submit" name="submit_checks" value="{{ lang('NL_TEST_RUN_CHECKS') }}" />
+	</fieldset>
+</fieldset>
+
+<fieldset>
+	<legend>{{ lang('NL_TEST_SEND') }}</legend>
+
+	<p>{{ lang('NL_TEST_SEND_EXPLAIN') }}</p>
+
+	<dl>
+		<dt><label for="nl_test_email">{{ lang('NL_TEST_TO') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_TEST_TO_EXPLAIN') }}</span></dt>
+		<dd><input type="email" id="nl_test_email" name="nl_test_email" value="{{ NL_TEST_EMAIL }}" size="40" class="inputbox" /></dd>
+	</dl>
+
+	<dl>
+		<dt><label for="nl_test_invalid">{{ lang('NL_TEST_INVALID') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_TEST_INVALID_EXPLAIN') }}</span></dt>
+		<dd><input type="number" id="nl_test_invalid" name="nl_test_invalid" value="{{ NL_TEST_INVALID }}" min="0" max="30" class="post" /></dd>
+	</dl>
+
+	<dl>
+		<dt><label for="nl_test_rejected">{{ lang('NL_TEST_REJECTED') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_TEST_REJECTED_EXPLAIN', NL_TEST_DOMAIN) }}</span></dt>
+		<dd><input type="number" id="nl_test_rejected" name="nl_test_rejected" value="{{ NL_TEST_REJECTED }}" min="0" max="30" class="post" /></dd>
+	</dl>
+
+	<dl>
+		<dt><label for="nl_test_threshold">{{ lang('NL_TEST_THRESHOLD_FIELD') }}{{ lang('COLON') }}</label><br /><span>{{ lang('NL_TEST_THRESHOLD_EXPLAIN') }}</span></dt>
+		<dd><input type="number" id="nl_test_threshold" name="nl_test_threshold" value="{{ NL_TEST_THRESHOLD }}" min="0" max="50" class="post" /></dd>
+	</dl>
+
+	<fieldset class="submit-buttons">
+		<input class="button1" type="submit" name="submit_send" value="{{ lang('NL_TEST_RUN_SEND') }}" />
+	</fieldset>
+</fieldset>
+
+{{ S_FORM_TOKEN }}
+</form>
+
+<!-- INCLUDE overall_footer.html -->
